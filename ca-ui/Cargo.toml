@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 cellular-automata = { path = "../cellular-automata" }
+pixels = "0.13"
+winit = { version = "0.29", features = ["rwh_05"] }

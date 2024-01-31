@@ -59,3 +59,7 @@ pub fn grid_to_string<const W: usize, const H: usize>(grid: &[[LifeState; H]; W]
 		.map(|row| row.iter().map(|cell| cell.to_string()).collect::<String>() + "\n")
 		.collect()
 }
+
+pub fn draw_grid<const W: usize, const H: usize>(grid: &[[LifeState; H]; W], frame: &mut [u8]) {
+	todo!()
+}
