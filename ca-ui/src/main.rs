@@ -11,16 +11,16 @@ use winit::{
 	window::WindowBuilder,
 };
 
-const WIDTH: usize = 600;
-const HEIGHT: usize = 400;
-const SCALE: usize = 2;
+const WIDTH: usize = 400;
+const HEIGHT: usize = 200;
+const SCALE: usize = 4;
 
 fn main() {
 	let mut automaton: GameOfLife<WIDTH, HEIGHT> =
 		GameOfLife::new(World::from_fn(|_| rand::random::<bool>()));
 
-	let mut running = true;
-	let mut speed = 32;
+	let mut running = false;
+	let mut speed = 1;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);

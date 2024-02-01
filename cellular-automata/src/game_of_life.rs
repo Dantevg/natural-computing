@@ -20,7 +20,7 @@ impl<const W: usize, const H: usize> Automaton<bool, W, H> for GameOfLife<W, H> 
 		let cell = neighbourhood[4];
 		let n_neighbours =
 			neighbourhood.into_iter().filter(|&cell| cell).count() as u8 - cell as u8;
-		((cell && (n_neighbours == 2 || n_neighbours == 3)) || (!cell && n_neighbours == 3)) as bool
+		(cell && (n_neighbours == 2 || n_neighbours == 3)) || (!cell && n_neighbours == 3)
 	}
 
 	fn colour(cell: bool) -> [u8; 4] {
