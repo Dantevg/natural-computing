@@ -12,40 +12,40 @@ where
 {
 	pub fn step(&mut self) {
 		let mut new_grid = self.grid.clone();
-		for y in 0..W {
-			for x in 0..H {
-				new_grid[y][x] = (self.transition)(&self.grid[y][x], self.get_neighbours(x, y));
+		for y in 0..H {
+			for x in 0..W {
+				new_grid[y][x] =
+					(self.transition)(&self.grid[y][x], self.get_neighbours(x as i32, y as i32));
 			}
 		}
 		self.grid = new_grid;
 	}
 
+	#[allow(unused)]
 	fn get_opt(&self, x: usize, y: usize) -> Option<&S> {
 		self.grid.get(y).and_then(|row| row.get(x))
 	}
 
-	fn get_neighbour(&self, x: usize, y: usize, x_off: isize, y_off: isize) -> Option<&S> {
-		let x = x.checked_add_signed(x_off)?;
-		let y = y.checked_add_signed(y_off)?;
-		self.get_opt(x, y)
+	fn get_wrapping(&self, x: i32, y: i32) -> &S {
+		&self.grid[y.rem_euclid(H as i32) as usize][x.rem_euclid(W as i32) as usize]
 	}
 
-	fn get_neighbours(&self, x: usize, y: usize) -> [[Option<&S>; 3]; 3] {
+	fn get_neighbours(&self, x: i32, y: i32) -> [[Option<&S>; 3]; 3] {
 		[
 			[
-				self.get_neighbour(x, y, -1, -1),
-				self.get_neighbour(x, y, 0, -1),
-				self.get_neighbour(x, y, 1, -1),
+				Some(self.get_wrapping(x - 1, y - 1)),
+				Some(self.get_wrapping(x, y - 1)),
+				Some(self.get_wrapping(x + 1, y - 1)),
 			],
 			[
-				self.get_neighbour(x, y, -1, 0),
+				Some(self.get_wrapping(x - 1, y)),
 				None, // exclude self from neighbours
-				self.get_neighbour(x, y, 1, 0),
+				Some(self.get_wrapping(x + 1, y)),
 			],
 			[
-				self.get_neighbour(x, y, -1, 1),
-				self.get_neighbour(x, y, 0, 1),
-				self.get_neighbour(x, y, 1, 1),
+				Some(self.get_wrapping(x - 1, y + 1)),
+				Some(self.get_wrapping(x, y + 1)),
+				Some(self.get_wrapping(x + 1, y + 1)),
 			],
 		]
 	}

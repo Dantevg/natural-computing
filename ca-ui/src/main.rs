@@ -4,56 +4,100 @@ use cellular_automata::Automaton;
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
-	event::{Event, WindowEvent},
-	event_loop::EventLoop,
+	event::{ElementState, Event, WindowEvent},
+	event_loop::{ControlFlow, EventLoop},
+	keyboard::{Key, NamedKey},
+	platform::modifier_supplement::KeyEventExtModifierSupplement,
 	window::WindowBuilder,
 };
 
 use crate::game_of_life::{draw_grid, game_of_life, grid_to_string, LifeState};
 
-const WIDTH: u32 = 600;
-const HEIGHT: u32 = 400;
+const WIDTH: usize = 200;
+const HEIGHT: usize = 150;
+const SCALE: usize = 2;
 
 fn main() {
-	let mut a = Automaton::<LifeState, 8, 8> {
-		grid: vec![[LifeState::Dead; 8]; 8]
+	let mut automaton = Automaton::<LifeState, WIDTH, HEIGHT> {
+		grid: vec![[LifeState::Dead; WIDTH]; HEIGHT]
 			.into_boxed_slice()
 			.try_into()
 			.unwrap(),
 		transition: game_of_life,
 	};
-	a.grid[3][3] = LifeState::Alive;
-	a.grid[3][4] = LifeState::Alive;
-	a.grid[4][3] = LifeState::Alive;
-	a.grid[4][4] = LifeState::Alive;
-	println!("{}", grid_to_string(&a.grid));
-	a.step();
-	println!("{}", grid_to_string(&a.grid));
+	automaton.grid[0][1] = LifeState::Alive;
+	automaton.grid[1][2] = LifeState::Alive;
+	automaton.grid[2][2] = LifeState::Alive;
+	automaton.grid[2][1] = LifeState::Alive;
+	automaton.grid[2][0] = LifeState::Alive;
+
+	let mut running = false;
+	let mut speed = 1;
 
 	let event_loop = EventLoop::new().unwrap();
+	event_loop.set_control_flow(ControlFlow::Wait);
+
 	let window = WindowBuilder::new()
 		.with_title("Game of Life")
-		.with_inner_size(PhysicalSize::new(WIDTH, HEIGHT))
+		.with_inner_size(PhysicalSize::new(
+			(WIDTH * SCALE) as u32,
+			(HEIGHT * SCALE) as u32,
+		))
 		.build(&event_loop)
 		.unwrap();
 
-	let mut pixels =
-		Pixels::new(WIDTH, HEIGHT, SurfaceTexture::new(WIDTH, HEIGHT, &window)).unwrap();
+	let mut pixels = {
+		let window_size = window.inner_size();
+		let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
+		Pixels::new(
+			(WIDTH * SCALE) as u32,
+			(HEIGHT * SCALE) as u32,
+			surface_texture,
+		)
+		.unwrap()
+	};
 
 	event_loop
-		.run(move |event, window_target| match event {
-			Event::WindowEvent {
-				event: WindowEvent::CloseRequested,
-				..
-			} => window_target.exit(),
-			Event::WindowEvent {
-				event: WindowEvent::RedrawRequested,
-				..
-			} => {
-				draw_grid(&a.grid, pixels.frame_mut());
-				pixels.render().unwrap();
+		.run(move |event, window_target| {
+			if let Event::WindowEvent { event, .. } = event {
+				match event {
+					WindowEvent::CloseRequested => window_target.exit(),
+					WindowEvent::RedrawRequested => {
+						if running {
+							for _ in 0..speed {
+								automaton.step();
+							}
+							window.request_redraw();
+						}
+						draw_grid(&automaton.grid, pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						pixels.render().unwrap();
+					}
+					WindowEvent::KeyboardInput { event, .. } => match event
+						.key_without_modifiers()
+						.as_ref()
+					{
+						Key::Named(NamedKey::Space) if event.state == ElementState::Pressed => {
+							running = !running;
+							if running {
+								window.request_redraw();
+							}
+						}
+						Key::Named(NamedKey::ArrowLeft) if event.state == ElementState::Pressed => {
+							speed = 1.max(speed - 1);
+						}
+						Key::Named(NamedKey::ArrowRight)
+							if event.state == ElementState::Pressed =>
+						{
+							speed += 1;
+						}
+						Key::Character("p") if event.state == ElementState::Pressed => {
+							println!("{}", grid_to_string(&automaton.grid));
+						}
+						_ => (),
+					},
+					_ => (),
+				}
 			}
-			_ => (),
 		})
 		.unwrap();
 }

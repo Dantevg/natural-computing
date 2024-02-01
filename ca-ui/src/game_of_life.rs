@@ -14,6 +14,13 @@ impl LifeState {
 			LifeState::Alive => true,
 		}
 	}
+
+	pub fn colour(&self) -> [u8; 4] {
+		match self {
+			LifeState::Dead => [0x00, 0x00, 0x00, 0xff],
+			LifeState::Alive => [0xff, 0xff, 0xff, 0xff],
+		}
+	}
 }
 
 impl Display for LifeState {
@@ -60,6 +67,18 @@ pub fn grid_to_string<const W: usize, const H: usize>(grid: &[[LifeState; H]; W]
 		.collect()
 }
 
-pub fn draw_grid<const W: usize, const H: usize>(grid: &[[LifeState; H]; W], frame: &mut [u8]) {
-	todo!()
+pub fn draw_grid<const W: usize, const H: usize>(
+	grid: &[[LifeState; W]; H],
+	frame: &mut [u8],
+	frame_width: usize,
+	scale: usize,
+) {
+	for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
+		let x = i % frame_width / scale;
+		let y = i / frame_width / scale;
+
+		if x < W && y < H {
+			pixel.copy_from_slice(&grid[y][x].colour());
+		}
+	}
 }
