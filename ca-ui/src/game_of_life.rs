@@ -1,5 +1,7 @@
 use core::fmt::{Display, Write};
 
+use rand::distributions::{Distribution, Standard};
+
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 pub enum LifeState {
 	#[default]
@@ -28,6 +30,16 @@ impl Display for LifeState {
 		match self {
 			LifeState::Dead => f.write_char('.'),
 			LifeState::Alive => f.write_char('#'),
+		}
+	}
+}
+
+impl Distribution<LifeState> for Standard {
+	fn sample<R: rand::prelude::Rng + ?Sized>(&self, rng: &mut R) -> LifeState {
+		if rng.gen() {
+			LifeState::Alive
+		} else {
+			LifeState::Dead
 		}
 	}
 }

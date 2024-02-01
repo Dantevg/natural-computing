@@ -1,5 +1,7 @@
 pub mod game_of_life;
 
+use core::array;
+
 use cellular_automata::Automaton;
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
@@ -18,18 +20,12 @@ const HEIGHT: usize = 150;
 const SCALE: usize = 2;
 
 fn main() {
-	let mut automaton = Automaton::<LifeState, WIDTH, HEIGHT> {
-		grid: vec![[LifeState::Dead; WIDTH]; HEIGHT]
-			.into_boxed_slice()
-			.try_into()
-			.unwrap(),
+	let mut automaton = Automaton {
+		grid: Box::<[[LifeState; WIDTH]; HEIGHT]>::new(array::from_fn(|_| {
+			array::from_fn(|_| rand::random())
+		})),
 		transition: game_of_life,
 	};
-	automaton.grid[0][1] = LifeState::Alive;
-	automaton.grid[1][2] = LifeState::Alive;
-	automaton.grid[2][2] = LifeState::Alive;
-	automaton.grid[2][1] = LifeState::Alive;
-	automaton.grid[2][0] = LifeState::Alive;
 
 	let mut running = false;
 	let mut speed = 1;
