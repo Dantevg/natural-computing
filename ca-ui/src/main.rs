@@ -1,11 +1,14 @@
 pub mod game_of_life;
 pub mod game_of_life_bitvec;
+pub mod game_of_life_imgref;
 
 use std::time::Instant;
 
 use cellular_automata::Automaton;
 use game_of_life::{game_of_life, LifeState};
-use game_of_life_bitvec::GameOfLife;
+use game_of_life_imgref::GameOfLife;
+// use game_of_life_bitvec::GameOfLife;
+use imgref::Img;
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -32,12 +35,16 @@ fn main() {
 	// }
 
 	let mut automaton: GameOfLife<WIDTH, HEIGHT> = GameOfLife::new();
-	for mut cell in automaton.grid.iter_mut() {
-		*cell = rand::random();
+	// for mut cell in automaton.grid.iter_mut() {
+	// 	*cell = rand::random();
+	// }
+
+	for pixel in automaton.grid.pixels_mut() {
+		*pixel = rand::random::<bool>() as u8;
 	}
 
 	let mut running = true;
-	let mut speed = 1;
+	let mut speed = 16;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
