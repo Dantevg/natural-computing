@@ -1,8 +1,11 @@
 pub mod game_of_life;
+pub mod game_of_life_bitvec;
 
-use core::array;
+use std::time::Instant;
 
 use cellular_automata::Automaton;
+use game_of_life::{game_of_life, LifeState};
+use game_of_life_bitvec::GameOfLife;
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -13,21 +16,27 @@ use winit::{
 	window::WindowBuilder,
 };
 
-use crate::game_of_life::{draw_grid, game_of_life, grid_to_string, LifeState};
+use crate::game_of_life::draw_grid;
 
-const WIDTH: usize = 200;
-const HEIGHT: usize = 150;
+const WIDTH: usize = 600;
+const HEIGHT: usize = 400;
 const SCALE: usize = 2;
 
 fn main() {
-	let mut automaton = Automaton {
-		grid: Box::<[[LifeState; WIDTH]; HEIGHT]>::new(array::from_fn(|_| {
-			array::from_fn(|_| rand::random())
-		})),
-		transition: game_of_life,
-	};
+	// let mut automaton: Automaton<LifeState, WIDTH, HEIGHT> = Automaton::new(game_of_life);
 
-	let mut running = false;
+	// for row in automaton.grid.iter_mut() {
+	// 	for cell in row.iter_mut() {
+	// 		*cell = rand::random();
+	// 	}
+	// }
+
+	let mut automaton: GameOfLife<WIDTH, HEIGHT> = GameOfLife::new();
+	for mut cell in automaton.grid.iter_mut() {
+		*cell = rand::random();
+	}
+
+	let mut running = true;
 	let mut speed = 1;
 
 	let event_loop = EventLoop::new().unwrap();
@@ -59,14 +68,24 @@ fn main() {
 				match event {
 					WindowEvent::CloseRequested => window_target.exit(),
 					WindowEvent::RedrawRequested => {
+						let start_time = Instant::now();
 						if running {
 							for _ in 0..speed {
 								automaton.step();
 							}
 							window.request_redraw();
 						}
-						draw_grid(&automaton.grid, pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						let update_time = Instant::now();
+						// draw_grid(&automaton.grid, pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						automaton.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						pixels.render().unwrap();
+						let draw_time = Instant::now();
+						println!(
+							"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
+							update_time.duration_since(start_time).as_millis(),
+							update_time.duration_since(start_time).as_millis() / speed,
+							draw_time.duration_since(start_time).as_millis()
+						)
 					}
 					WindowEvent::KeyboardInput { event, .. } => match event
 						.key_without_modifiers()
@@ -78,16 +97,20 @@ fn main() {
 								window.request_redraw();
 							}
 						}
-						Key::Named(NamedKey::ArrowLeft) if event.state == ElementState::Pressed => {
-							speed = 1.max(speed - 1);
+						Key::Named(NamedKey::ArrowDown) if event.state == ElementState::Pressed => {
+							speed = 1.max(speed / 2);
+						}
+						Key::Named(NamedKey::ArrowUp) if event.state == ElementState::Pressed => {
+							speed *= 2;
 						}
 						Key::Named(NamedKey::ArrowRight)
-							if event.state == ElementState::Pressed =>
+							if event.state == ElementState::Pressed && !running =>
 						{
-							speed += 1;
+							automaton.step();
+							window.request_redraw();
 						}
 						Key::Character("p") if event.state == ElementState::Pressed => {
-							println!("{}", grid_to_string(&automaton.grid));
+							// println!("{}", grid_to_string(&automaton.grid));
 						}
 						_ => (),
 					},

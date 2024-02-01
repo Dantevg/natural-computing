@@ -10,3 +10,4 @@ cellular-automata = { path = "../cellular-automata" }
 pixels = "0.13"
 winit = { version = "0.29", features = ["rwh_05"] }
 rand = "0.8.5"
+bitvec = "1.0.1"
