@@ -1,14 +1,6 @@
-pub mod game_of_life;
-pub mod game_of_life_bitvec;
-pub mod game_of_life_imgref;
-
 use std::time::Instant;
 
-use cellular_automata::Automaton;
-use game_of_life::{game_of_life, LifeState};
-use game_of_life_imgref::GameOfLife;
-// use game_of_life_bitvec::GameOfLife;
-use imgref::Img;
+use cellular_automata::{game_of_life::GameOfLife, Automaton, World};
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -19,32 +11,16 @@ use winit::{
 	window::WindowBuilder,
 };
 
-use crate::game_of_life::draw_grid;
-
 const WIDTH: usize = 600;
 const HEIGHT: usize = 400;
 const SCALE: usize = 2;
 
 fn main() {
-	// let mut automaton: Automaton<LifeState, WIDTH, HEIGHT> = Automaton::new(game_of_life);
-
-	// for row in automaton.grid.iter_mut() {
-	// 	for cell in row.iter_mut() {
-	// 		*cell = rand::random();
-	// 	}
-	// }
-
-	let mut automaton: GameOfLife<WIDTH, HEIGHT> = GameOfLife::new();
-	// for mut cell in automaton.grid.iter_mut() {
-	// 	*cell = rand::random();
-	// }
-
-	for pixel in automaton.grid.pixels_mut() {
-		*pixel = rand::random::<bool>() as u8;
-	}
+	let mut automaton: GameOfLife<WIDTH, HEIGHT> =
+		GameOfLife::new(World::from_fn(|_| rand::random::<bool>()));
 
 	let mut running = true;
-	let mut speed = 16;
+	let mut speed = 32;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
@@ -83,7 +59,6 @@ fn main() {
 							window.request_redraw();
 						}
 						let update_time = Instant::now();
-						// draw_grid(&automaton.grid, pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						automaton.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
@@ -115,9 +90,6 @@ fn main() {
 						{
 							automaton.step();
 							window.request_redraw();
-						}
-						Key::Character("p") if event.state == ElementState::Pressed => {
-							// println!("{}", grid_to_string(&automaton.grid));
 						}
 						_ => (),
 					},

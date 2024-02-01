@@ -1,62 +1,52 @@
-pub struct Automaton<S, const W: usize, const H: usize> {
-	pub grid: Box<[[S; W]; H]>,
-	pub transition: fn(state: &S, neighbours: [[Option<&S>; 3]; 3]) -> S,
-}
+pub mod game_of_life;
 
-impl<S, const W: usize, const H: usize> Automaton<S, W, H>
-where
-	S: Clone,
-{
-	pub fn new(transition: fn(state: &S, neighbours: [[Option<&S>; 3]; 3]) -> S) -> Self
-	where
-		S: Clone + Copy + Default + core::fmt::Debug,
-	{
-		Automaton {
-			grid: vec![[Default::default(); W]; H]
-				.into_boxed_slice()
-				.try_into()
-				.unwrap(),
-			transition,
-		}
+use imgref::Img;
+use loop9::loop9_img;
+
+pub trait Automaton<S: Clone + Copy, const W: usize, const H: usize> {
+	fn get_world(&mut self) -> &mut World<S, W, H>;
+	fn transition(neighbourhood: [S; 9]) -> S;
+	fn colour(cell: S) -> [u8; 4];
+
+	fn step(&mut self) {
+		let world = self.get_world();
+		let mut new_grid = world.0.clone();
+		loop9_img(world.0.as_ref(), |x, y, top, mid, bot| {
+			let neighbourhood = [
+				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
+				bot.next,
+			];
+			new_grid[(x, y)] = Self::transition(neighbourhood);
+		});
+		world.0 = new_grid;
 	}
 
-	pub fn step(&mut self) {
-		let mut new_grid = self.grid.clone();
-		for y in 0..H {
-			for x in 0..W {
-				new_grid[y][x] =
-					(self.transition)(&self.grid[y][x], self.get_neighbours(x as i32, y as i32));
+	fn draw(&mut self, frame: &mut [u8], frame_width: usize, scale: usize) {
+		for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
+			let x = i % frame_width / scale;
+			let y = i / frame_width / scale;
+
+			if x < W && y < H {
+				pixel.copy_from_slice(&Self::colour(self.get_world().0[(x, y)]));
 			}
 		}
-		self.grid = new_grid;
 	}
+}
 
-	#[allow(unused)]
-	fn get_opt(&self, x: usize, y: usize) -> Option<&S> {
-		self.grid.get(y).and_then(|row| row.get(x))
+pub struct World<S: Clone + Copy, const W: usize, const H: usize>(Img<Vec<S>>);
+
+impl<S: Default + Clone + Copy, const W: usize, const H: usize> World<S, W, H> {
+	pub fn from_fn<F>(function: F) -> Self
+	where
+		F: FnMut(usize) -> S,
+	{
+		let buf = (0..(W * H)).map(function).collect();
+		Self(Img::new(buf, W, H))
 	}
+}
 
-	fn get_wrapping(&self, x: i32, y: i32) -> &S {
-		&self.grid[y.rem_euclid(H as i32) as usize][x.rem_euclid(W as i32) as usize]
-	}
-
-	fn get_neighbours(&self, x: i32, y: i32) -> [[Option<&S>; 3]; 3] {
-		[
-			[
-				Some(self.get_wrapping(x - 1, y - 1)),
-				Some(self.get_wrapping(x, y - 1)),
-				Some(self.get_wrapping(x + 1, y - 1)),
-			],
-			[
-				Some(self.get_wrapping(x - 1, y)),
-				None, // exclude self from neighbours
-				Some(self.get_wrapping(x + 1, y)),
-			],
-			[
-				Some(self.get_wrapping(x - 1, y + 1)),
-				Some(self.get_wrapping(x, y + 1)),
-				Some(self.get_wrapping(x + 1, y + 1)),
-			],
-		]
+impl<S: Default + Clone + Copy, const W: usize, const H: usize> Default for World<S, W, H> {
+	fn default() -> Self {
+		Self(Img::new(vec![S::default(); W * H], W, H))
 	}
 }
