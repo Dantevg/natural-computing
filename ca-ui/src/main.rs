@@ -1,11 +1,6 @@
 use std::time::Instant;
 
-use cellular_automata::{
-	game_of_life::GameOfLife,
-	grow::Grow,
-	sir::{Sir, SirState},
-	Automaton, World,
-};
+use cellular_automata::{game_of_life::GameOfLife, Automaton, World};
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -21,17 +16,20 @@ const HEIGHT: usize = 200;
 const SCALE: usize = 4;
 
 fn main() {
-	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
-	let mut automaton: Sir<WIDTH, HEIGHT> = Sir::new(
-		World::from_fn(|i| {
-			if i == middle_idx {
-				SirState::Infected
-			} else {
-				SirState::default()
-			}
-		}),
-		0.15,
-	);
+	// let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
+	// let mut automaton: Sir<WIDTH, HEIGHT> = Sir::new(
+	// 	World::from_fn(|i| {
+	// 		if i == middle_idx {
+	// 			SirState::Infected
+	// 		} else {
+	// 			SirState::default()
+	// 		}
+	// 	}),
+	// 	0.15,
+	// );
+
+	let mut automaton: GameOfLife<WIDTH, HEIGHT> =
+		GameOfLife::new(World::from_fn(|_| rand::random(), true));
 
 	let mut running = false;
 	let mut speed = 1;
@@ -73,7 +71,7 @@ fn main() {
 							window.request_redraw();
 						}
 						let update_time = Instant::now();
-						automaton.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						// automaton.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
 						println!(

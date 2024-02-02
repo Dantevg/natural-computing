@@ -1,21 +1,21 @@
-use crate::{Automaton, World};
+use crate::{Automaton, GridWorld};
 
 #[derive(Default)]
 pub struct Grow<const W: usize, const H: usize> {
-	world: World<bool, W, H>,
+	world: GridWorld<bool, W, H>,
 }
 
 impl<const W: usize, const H: usize> Grow<W, H> {
-	pub fn new(world: World<bool, W, H>) -> Self {
+	pub fn new(world: GridWorld<bool, W, H>) -> Self {
 		Self { world }
 	}
 }
 
-impl<const W: usize, const H: usize> Automaton<bool, W, H> for Grow<W, H> {
-	fn get_world(&self) -> &World<bool, W, H> {
+impl<const W: usize, const H: usize> Automaton<bool> for Grow<W, H> {
+	fn get_world(&self) -> &GridWorld<bool, W, H> {
 		&self.world
 	}
-	fn get_world_mut(&mut self) -> &mut World<bool, W, H> {
+	fn get_world_mut(&mut self) -> &mut GridWorld<bool, W, H> {
 		&mut self.world
 	}
 

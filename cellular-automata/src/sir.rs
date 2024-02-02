@@ -1,4 +1,4 @@
-use crate::{Automaton, World};
+use crate::{Automaton, GridWorld};
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub enum SirState {
@@ -10,21 +10,21 @@ pub enum SirState {
 
 #[derive(Default)]
 pub struct Sir<const W: usize, const H: usize> {
-	world: World<SirState, W, H>,
+	world: GridWorld<SirState, W, H>,
 	p_cure: f32,
 }
 
 impl<const W: usize, const H: usize> Sir<W, H> {
-	pub fn new(world: World<SirState, W, H>, p_cure: f32) -> Self {
+	pub fn new(world: GridWorld<SirState, W, H>, p_cure: f32) -> Self {
 		Self { world, p_cure }
 	}
 }
 
-impl<const W: usize, const H: usize> Automaton<SirState, W, H> for Sir<W, H> {
-	fn get_world(&self) -> &World<SirState, W, H> {
+impl<const W: usize, const H: usize> Automaton<SirState> for Sir<W, H> {
+	fn get_world(&self) -> &GridWorld<SirState, W, H> {
 		&self.world
 	}
-	fn get_world_mut(&mut self) -> &mut World<SirState, W, H> {
+	fn get_world_mut(&mut self) -> &mut GridWorld<SirState, W, H> {
 		&mut self.world
 	}
 
