@@ -1,11 +1,14 @@
 pub mod game_of_life;
+pub mod grow;
+pub mod sir;
 
 use imgref::Img;
 use loop9::loop9_img;
 
 pub trait Automaton<S: Clone + Copy, const W: usize, const H: usize> {
-	fn get_world(&mut self) -> &mut World<S, W, H>;
-	fn transition(neighbourhood: [S; 9]) -> S;
+	fn get_world(&self) -> &World<S, W, H>;
+	fn get_world_mut(&mut self) -> &mut World<S, W, H>;
+	fn transition(&self, neighbourhood: [S; 9]) -> S;
 	fn colour(cell: S) -> [u8; 4];
 
 	fn step(&mut self) {
@@ -16,9 +19,9 @@ pub trait Automaton<S: Clone + Copy, const W: usize, const H: usize> {
 				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
 				bot.next,
 			];
-			new_grid[(x, y)] = Self::transition(neighbourhood);
+			new_grid[(x, y)] = self.transition(neighbourhood);
 		});
-		world.0 = new_grid;
+		self.get_world_mut().0 = new_grid;
 	}
 
 	fn draw(&mut self, frame: &mut [u8], frame_width: usize, scale: usize) {
