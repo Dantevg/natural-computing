@@ -29,7 +29,7 @@ fn main() {
 	// );
 
 	let automaton = GameOfLife;
-	let mut world: World<_, WIDTH, HEIGHT> = World::from_fn(|_| rand::random(), true);
+	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|_| rand::random(), true);
 
 	let mut running = true;
 	let mut speed = 8;

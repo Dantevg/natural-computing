@@ -12,17 +12,17 @@ where
 	fn colour(&self) -> [u8; 4];
 }
 
-pub trait Automaton {
+pub trait Automaton<const W: usize, const H: usize> {
 	type S: Cell;
 	fn rule(&self, neighbourhood: [Self::S; 9]) -> Self::S;
 }
 
-pub struct World<A: Automaton, const W: usize, const H: usize> {
+pub struct World<const W: usize, const H: usize, A: Automaton<W, H>> {
 	img: Img<Vec<A::S>>,
 	wrap: bool,
 }
 
-impl<A: Automaton, const W: usize, const H: usize> Default for World<A, W, H>
+impl<const W: usize, const H: usize, A: Automaton<W, H>> Default for World<W, H, A>
 where
 	A::S: Default,
 {
@@ -34,7 +34,7 @@ where
 	}
 }
 
-impl<A: Automaton, const W: usize, const H: usize> World<A, W, H> {
+impl<const W: usize, const H: usize, A: Automaton<W, H>> World<W, H, A> {
 	pub fn from_fn<F>(function: F, wrap: bool) -> Self
 	where
 		F: FnMut(usize) -> A::S,

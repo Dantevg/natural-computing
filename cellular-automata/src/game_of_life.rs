@@ -13,7 +13,7 @@ impl Cell for bool {
 #[derive(Default)]
 pub struct GameOfLife;
 
-impl Automaton for GameOfLife {
+impl<const W: usize, const H: usize> Automaton<W, H> for GameOfLife {
 	type S = bool;
 
 	fn rule(&self, neighbourhood: [bool; 9]) -> bool {
