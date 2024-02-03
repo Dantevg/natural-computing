@@ -3,7 +3,7 @@ use std::time::Instant;
 use cellular_automata::{
 	grow::Grow,
 	sir::{Sir, SirState},
-	World,
+	world::World,
 };
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
@@ -24,7 +24,7 @@ fn main() {
 
 	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
 	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|_| rand::random(), true);
-	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|i| i == middle_idx, true);
+	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|i| i == middle_idx, false);
 	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
 		|i| {
 			if i == middle_idx {
@@ -36,8 +36,8 @@ fn main() {
 		false,
 	);
 
-	let mut running = false;
-	let mut speed = 1;
+	let mut running = true;
+	let mut speed = 8;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
