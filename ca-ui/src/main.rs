@@ -1,9 +1,11 @@
 use std::time::Instant;
 
 use cellular_automata::{
+	game_of_life::GameOfLife,
 	grow::Grow,
 	sir::{Sir, SirState},
 	world::World,
+	Automaton,
 };
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
@@ -15,26 +17,27 @@ use winit::{
 	window::WindowBuilder,
 };
 
-const WIDTH: usize = 800;
-const HEIGHT: usize = 450;
-const SCALE: usize = 2;
+const WIDTH: usize = 800 * 2;
+const HEIGHT: usize = 450 * 2;
+const SCALE: usize = 1;
 
 fn main() {
-	let automaton = Sir::new(0.15);
+	// let automaton = Sir::new(0.15);
+	let automaton = GameOfLife;
 
 	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
-	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|_| rand::random(), true);
+	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|_| rand::random(), true);
 	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|i| i == middle_idx, false);
-	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
-		|i| {
-			if i == middle_idx {
-				SirState::Infected
-			} else {
-				SirState::default()
-			}
-		},
-		false,
-	);
+	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
+	// 	|i| {
+	// 		if i == middle_idx {
+	// 			SirState::Infected
+	// 		} else {
+	// 			SirState::default()
+	// 		}
+	// 	},
+	// 	false,
+	// );
 
 	let mut running = true;
 	let mut speed = 8;
@@ -71,7 +74,7 @@ fn main() {
 						let start_time = Instant::now();
 						if running {
 							for _ in 0..speed {
-								world.step(&automaton);
+								automaton.step(&mut world);
 							}
 							window.request_redraw();
 						}
@@ -105,7 +108,7 @@ fn main() {
 						Key::Named(NamedKey::ArrowRight)
 							if event.state == ElementState::Pressed && !running =>
 						{
-							world.step(&automaton);
+							automaton.step(&mut world);
 							window.request_redraw();
 						}
 						_ => (),

@@ -4,7 +4,7 @@ use crate::Automaton;
 pub struct Grow;
 
 impl<const W: usize, const H: usize> Automaton<W, H> for Grow {
-	type S = bool;
+	type C = bool;
 
 	fn rule(&self, neighbourhood: [bool; 9]) -> bool {
 		let cell = neighbourhood[4];

@@ -30,7 +30,7 @@ impl Sir {
 }
 
 impl<const W: usize, const H: usize> Automaton<W, H> for Sir {
-	type S = SirState;
+	type C = SirState;
 
 	fn rule(&self, neighbourhood: [SirState; 9]) -> SirState {
 		let cell = neighbourhood[4];

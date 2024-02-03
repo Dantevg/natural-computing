@@ -361,6 +361,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpm"
+version = "0.1.0"
+dependencies = [
+ "cellular-automata",
+ "rand",
+]
+
+[[package]]
 name = "crossbeam-utils"
 version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"

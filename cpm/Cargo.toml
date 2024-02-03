@@ -1,0 +1,10 @@
+[package]
+name = "cpm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cellular-automata = { path = "../cellular-automata" }
+rand = "0.8.5"

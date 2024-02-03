@@ -1,39 +1,33 @@
 use imgref::Img;
 use loop9::loop9_img;
+use rand::prelude::*;
 
-use crate::{Automaton, Cell};
+use crate::Cell;
 
-pub struct World<const W: usize, const H: usize, A: Automaton<W, H>> {
-	img: Img<Vec<A::S>>,
-	wrap: bool,
+pub struct World<const W: usize, const H: usize, C: Cell> {
+	pub img: Img<Vec<C>>,
+	pub wrap: bool,
 }
 
-impl<const W: usize, const H: usize, A: Automaton<W, H>> Default for World<W, H, A>
-where
-	A::S: Default,
-{
+impl<const W: usize, const H: usize, C: Cell + Default> Default for World<W, H, C> {
 	fn default() -> Self {
 		Self {
-			img: Img::new(vec![A::S::default(); W * H], W, H),
+			img: Img::new(vec![C::default(); W * H], W, H),
 			wrap: true,
 		}
 	}
 }
 
-impl<const W: usize, const H: usize, A: Automaton<W, H>> World<W, H, A> {
+impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 	pub fn from_fn<F>(function: F, wrap: bool) -> Self
 	where
-		F: FnMut(usize) -> A::S,
+		F: FnMut(usize) -> C,
 	{
 		let buf = (0..(W * H)).map(function).collect();
 		Self {
 			img: Img::new(buf, W, H),
 			wrap,
 		}
-	}
-
-	pub fn step(&mut self, automaton: &A) {
-		self.convolve(|n| automaton.rule(n));
 	}
 
 	pub fn draw(&self, frame: &mut [u8], frame_width: usize, scale: usize) {
@@ -47,22 +41,86 @@ impl<const W: usize, const H: usize, A: Automaton<W, H>> World<W, H, A> {
 		}
 	}
 
-	fn convolve<F>(&mut self, mut function: F)
+	pub fn convolve<F>(&mut self, mut rule: F)
 	where
-		F: FnMut([A::S; 9]) -> A::S,
+		F: FnMut([C; 9]) -> C,
 	{
 		if self.wrap {
 			self.wrap_edges();
 		}
+
 		let mut new_img = self.img.clone();
 		loop9_img(self.img.as_ref(), |x, y, top, mid, bot| {
 			let neighbourhood = [
 				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
 				bot.next,
 			];
-			new_img[(x, y)] = function(neighbourhood);
+			new_img[(x, y)] = rule(neighbourhood);
 		});
 		self.img = new_img;
+	}
+
+	pub fn metropolis<F>(&mut self, mut rule: F)
+	where
+		F: FnMut(C, C) -> C,
+	{
+		if self.wrap {
+			self.wrap_edges();
+		}
+
+		let mut new_img = self.img.clone();
+		for _ in 0..W * H {
+			let mut rng = rand::thread_rng();
+			let src_idx = rng.gen_range(0..(W * H));
+			let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
+			let src = self.get_cell(src_idx);
+			let dest = self.get_cell(dest_idx);
+
+			if src != dest {
+				new_img[(dest_idx % W, dest_idx / W)] = rule(src, dest);
+			}
+		}
+		self.img = new_img;
+	}
+
+	pub fn get_cell(&self, idx: usize) -> C {
+		self.img[(idx % W, idx / W)]
+	}
+
+	pub fn get_cell_mut(&mut self, idx: usize) -> &mut C {
+		&mut self.img[(idx % W, idx / W)]
+	}
+
+	pub fn get_neighbour(&self, cell_idx: usize, offset: isize) -> Option<C> {
+		self.get_neighbour_idx(cell_idx, offset)
+			.map(|idx| self.get_cell(idx))
+	}
+
+	pub fn get_neighbours_idx(&self, cell_idx: usize) -> Box<[usize]> {
+		[
+			self.get_neighbour_idx(cell_idx, -(W as isize) - 1),
+			self.get_neighbour_idx(cell_idx, -(W as isize)),
+			self.get_neighbour_idx(cell_idx, -(W as isize) + 1),
+			self.get_neighbour_idx(cell_idx, -1),
+			/* ignore self */
+			self.get_neighbour_idx(cell_idx, 1),
+			self.get_neighbour_idx(cell_idx, W as isize - 1),
+			self.get_neighbour_idx(cell_idx, W as isize),
+			self.get_neighbour_idx(cell_idx, W as isize + 1),
+		]
+		.into_iter()
+		.filter_map(|idx| idx)
+		.collect()
+	}
+
+	fn get_neighbour_idx(&self, cell_idx: usize, offset: isize) -> Option<usize> {
+		if self.wrap {
+			Some((cell_idx as isize + offset).rem_euclid((W * H) as isize) as usize)
+		} else {
+			cell_idx
+				.checked_add_signed(offset)
+				.filter(|idx| (0..(W * H)).contains(&idx))
+		}
 	}
 
 	/// Wraps the edges of this [`World`] in such a way that this:

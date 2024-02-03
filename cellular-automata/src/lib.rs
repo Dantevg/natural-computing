@@ -3,14 +3,23 @@ pub mod grow;
 pub mod sir;
 pub mod world;
 
+use world::World;
+
 pub trait Cell
 where
-	Self: Clone + Copy,
+	Self: Clone + Copy + PartialEq + Eq,
 {
 	fn colour(&self) -> [u8; 4];
 }
 
 pub trait Automaton<const W: usize, const H: usize> {
-	type S: Cell;
-	fn rule(&self, neighbourhood: [Self::S; 9]) -> Self::S;
+	type C: Cell;
+	fn rule(&self, neighbourhood: [Self::C; 9]) -> Self::C;
+
+	fn step(&self, world: &mut World<W, H, Self::C>)
+	where
+		Self: Sized,
+	{
+		world.convolve(|n| self.rule(n))
+	}
 }
