@@ -1,6 +1,6 @@
 pub mod game_of_life;
-// pub mod grow;
-// pub mod sir;
+pub mod grow;
+pub mod sir;
 
 use imgref::Img;
 use loop9::loop9_img;
@@ -46,35 +46,8 @@ impl<const W: usize, const H: usize, A: Automaton<W, H>> World<W, H, A> {
 		}
 	}
 
-	pub fn convolve<F>(&self, mut function: F) -> Self
-	where
-		F: FnMut([A::S; 9]) -> A::S,
-	{
-		// TODO: check order of wrapping and convolution
-		let mut new_world = Self {
-			img: self.img.clone(),
-			wrap: self.wrap,
-		};
-		if self.wrap {
-			new_world.wrap_edges();
-		}
-		let mut new_grid = new_world.img.clone();
-		loop9_img(new_world.img.as_ref(), |x, y, top, mid, bot| {
-			let neighbourhood = [
-				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
-				bot.next,
-			];
-			new_grid[(x, y)] = function(neighbourhood);
-		});
-
-		Self {
-			img: new_grid,
-			wrap: self.wrap,
-		}
-	}
-
 	pub fn step(&mut self, automaton: &A) {
-		self.img = self.convolve(|n| automaton.rule(n)).img;
+		self.convolve(|n| automaton.rule(n));
 	}
 
 	pub fn draw(&self, frame: &mut [u8], frame_width: usize, scale: usize) {
@@ -86,6 +59,24 @@ impl<const W: usize, const H: usize, A: Automaton<W, H>> World<W, H, A> {
 				pixel.copy_from_slice(&self.img[(x, y)].colour());
 			}
 		}
+	}
+
+	fn convolve<F>(&mut self, mut function: F)
+	where
+		F: FnMut([A::S; 9]) -> A::S,
+	{
+		if self.wrap {
+			self.wrap_edges();
+		}
+		let mut new_img = self.img.clone();
+		loop9_img(self.img.as_ref(), |x, y, top, mid, bot| {
+			let neighbourhood = [
+				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
+				bot.next,
+			];
+			new_img[(x, y)] = function(neighbourhood);
+		});
+		self.img = new_img;
 	}
 
 	/// Wraps the edges of this [`World`] in such a way that this:
