@@ -11,9 +11,9 @@ use winit::{
 	window::WindowBuilder,
 };
 
-const WIDTH: usize = 400;
-const HEIGHT: usize = 200;
-const SCALE: usize = 4;
+const WIDTH: usize = 1600;
+const HEIGHT: usize = 900;
+const SCALE: usize = 1;
 
 fn main() {
 	// let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
@@ -28,11 +28,11 @@ fn main() {
 	// 	0.15,
 	// );
 
-	let mut automaton: GameOfLife<WIDTH, HEIGHT> =
-		GameOfLife::new(World::from_fn(|_| rand::random(), true));
+	let automaton = GameOfLife;
+	let mut world: World<_, WIDTH, HEIGHT> = World::from_fn(|_| rand::random(), true);
 
-	let mut running = false;
-	let mut speed = 1;
+	let mut running = true;
+	let mut speed = 8;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
@@ -66,12 +66,12 @@ fn main() {
 						let start_time = Instant::now();
 						if running {
 							for _ in 0..speed {
-								automaton.step();
+								world.step(&automaton);
 							}
 							window.request_redraw();
 						}
 						let update_time = Instant::now();
-						// automaton.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						world.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
 						println!(
@@ -100,7 +100,7 @@ fn main() {
 						Key::Named(NamedKey::ArrowRight)
 							if event.state == ElementState::Pressed && !running =>
 						{
-							automaton.step();
+							world.step(&automaton);
 							window.request_redraw();
 						}
 						_ => (),

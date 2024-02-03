@@ -2,8 +2,6 @@ pub mod game_of_life;
 // pub mod grow;
 // pub mod sir;
 
-use core::borrow::BorrowMut;
-
 use imgref::Img;
 use loop9::loop9_img;
 
@@ -14,37 +12,32 @@ where
 	fn colour(&self) -> [u8; 4];
 }
 
-pub trait Automaton<S: Cell, const W: usize, const H: usize> {
-	fn get_world(&self) -> &World<S, W, H>;
-	fn get_world_mut(&mut self) -> &mut World<S, W, H>;
-	fn rule(&self, neighbourhood: [S; 9]) -> S;
-
-	fn step(&mut self) {
-		let world = self
-			.get_world()
-			.convolve(|neighbourhood| self.rule(neighbourhood));
-		*self.get_world_mut() = world;
-	}
+pub trait Automaton {
+	type S: Cell;
+	fn rule(&self, neighbourhood: [Self::S; 9]) -> Self::S;
 }
 
-pub struct World<S: Cell, const W: usize, const H: usize> {
-	img: Img<Vec<S>>,
+pub struct World<A: Automaton, const W: usize, const H: usize> {
+	img: Img<Vec<A::S>>,
 	wrap: bool,
 }
 
-impl<S: Cell + Default, const W: usize, const H: usize> Default for World<S, W, H> {
+impl<A: Automaton, const W: usize, const H: usize> Default for World<A, W, H>
+where
+	A::S: Default,
+{
 	fn default() -> Self {
 		Self {
-			img: Img::new(vec![S::default(); W * H], W, H),
+			img: Img::new(vec![A::S::default(); W * H], W, H),
 			wrap: true,
 		}
 	}
 }
 
-impl<S: Cell, const W: usize, const H: usize> World<S, W, H> {
+impl<A: Automaton, const W: usize, const H: usize> World<A, W, H> {
 	pub fn from_fn<F>(function: F, wrap: bool) -> Self
 	where
-		F: FnMut(usize) -> S,
+		F: FnMut(usize) -> A::S,
 	{
 		let buf = (0..(W * H)).map(function).collect();
 		Self {
@@ -55,7 +48,7 @@ impl<S: Cell, const W: usize, const H: usize> World<S, W, H> {
 
 	pub fn convolve<F>(&self, mut function: F) -> Self
 	where
-		F: FnMut([S; 9]) -> S,
+		F: FnMut([A::S; 9]) -> A::S,
 	{
 		// TODO: check order of wrapping and convolution
 		let mut new_world = Self {
@@ -80,7 +73,11 @@ impl<S: Cell, const W: usize, const H: usize> World<S, W, H> {
 		}
 	}
 
-	pub fn draw(&mut self, frame: &mut [u8], frame_width: usize, scale: usize) {
+	pub fn step(&mut self, automaton: &A) {
+		self.img = self.convolve(|n| automaton.rule(n)).img;
+	}
+
+	pub fn draw(&self, frame: &mut [u8], frame_width: usize, scale: usize) {
 		for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
 			let x = i % frame_width / scale;
 			let y = i / frame_width / scale;

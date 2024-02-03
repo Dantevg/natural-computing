@@ -1,4 +1,4 @@
-use crate::{Automaton, Cell, World};
+use crate::{Automaton, Cell};
 
 impl Cell for bool {
 	fn colour(&self) -> [u8; 4] {
@@ -11,29 +11,10 @@ impl Cell for bool {
 }
 
 #[derive(Default)]
-pub struct GameOfLife<const W: usize, const H: usize> {
-	world: World<bool, W, H>,
-}
+pub struct GameOfLife;
 
-impl<const W: usize, const H: usize> GameOfLife<W, H> {
-	pub fn new(world: World<bool, W, H>) -> Self {
-		Self { world }
-	}
-
-	// pub fn step_(&mut self) {
-	// 	self.world = self
-	// 		.world
-	// 		.convolute(|neighbourhood| self.rule(neighbourhood));
-	// }
-}
-
-impl<const W: usize, const H: usize> Automaton<bool, W, H> for GameOfLife<W, H> {
-	fn get_world(&self) -> &World<bool, W, H> {
-		&self.world
-	}
-	fn get_world_mut(&mut self) -> &mut World<bool, W, H> {
-		&mut self.world
-	}
+impl Automaton for GameOfLife {
+	type S = bool;
 
 	fn rule(&self, neighbourhood: [bool; 9]) -> bool {
 		let cell = neighbourhood[4];
