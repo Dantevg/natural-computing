@@ -26,10 +26,10 @@ const HEIGHT: usize = 256;
 const SCALE: usize = 4;
 
 fn main() {
-	let model = ExampleCPM::new(0.5, 0.5);
+	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
 	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
-		|_| {
-			if rand::random::<bool>() {
+		|i| {
+			if i == middle_idx {
 				CPMCell(0xff)
 			} else {
 				CPMCell(0x00)
@@ -37,6 +37,17 @@ fn main() {
 		},
 		true,
 	);
+	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
+	// 	|_| {
+	// 		if rand::random::<bool>() {
+	// 			CPMCell(0xff)
+	// 		} else {
+	// 			CPMCell(0x00)
+	// 		}
+	// 	},
+	// 	true,
+	// );
+	let mut model = ExampleCPM::new(0.1, 0.1, 100, 0.1, &world);
 
 	let mut running = false;
 	let mut speed = 1;
