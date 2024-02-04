@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use cellular_automata::world::World;
 use cpm::{
-	example::{CPMCell, ExampleCPM},
+	example::{ExampleCPM, ExampleCell},
 	CPM,
 };
 use pixels::{Pixels, SurfaceTexture};
@@ -37,7 +37,7 @@ fn main() {
 	for i in 1..32 {
 		let x = 96 + rng.gen_range(0..32) * 2 as usize;
 		let y = 96 + rng.gen_range(0..32) * 2 as usize;
-		world.img[(x, y)] = CPMCell(i);
+		world.img[(x, y)] = ExampleCell(i);
 	}
 	let mut model = ExampleCPM::new(0.1, 0.1, 150, 0.1, 150, 0.05, &world);
 

@@ -1,12 +1,22 @@
 pub mod adhesion;
+pub mod cell_perimeters;
+pub mod cell_volumes;
 pub mod example;
 pub mod perimeter;
 pub mod volume;
 
 use cellular_automata::{world::World, Cell};
 
+pub trait CPMCell
+where
+	Self: Cell,
+{
+	fn is_bg(&self) -> bool;
+	fn id(&self) -> usize;
+}
+
 pub trait CPM<const W: usize, const H: usize> {
-	type C: Cell;
+	type C: Cell + CPMCell;
 	fn hamiltonian(
 		&self,
 		world: &World<W, H, Self::C>,
