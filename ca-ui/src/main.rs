@@ -1,17 +1,12 @@
 use std::time::Instant;
 
-use cellular_automata::{
-	game_of_life::GameOfLife,
-	grow::Grow,
-	sir::{Sir, SirState},
-	world::World,
-	Automaton,
-};
+use cellular_automata::world::World;
 use cpm::{
 	example::{CPMCell, ExampleCPM},
 	CPM,
 };
 use pixels::{Pixels, SurfaceTexture};
+use rand::Rng;
 use winit::{
 	dpi::PhysicalSize,
 	event::{ElementState, Event, WindowEvent},
@@ -26,17 +21,7 @@ const HEIGHT: usize = 256;
 const SCALE: usize = 4;
 
 fn main() {
-	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
-	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
-		|i| {
-			if i == middle_idx {
-				CPMCell(0xff)
-			} else {
-				CPMCell(0x00)
-			}
-		},
-		true,
-	);
+	// let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
 	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
 	// 	|_| {
 	// 		if rand::random::<bool>() {
@@ -47,7 +32,14 @@ fn main() {
 	// 	},
 	// 	true,
 	// );
-	let mut model = ExampleCPM::new(0.1, 0.1, 100, 0.1, &world);
+	let mut world: World<WIDTH, HEIGHT, _> = World::default();
+	let mut rng = rand::thread_rng();
+	for i in 1..32 {
+		let x = 96 + rng.gen_range(0..32) * 2 as usize;
+		let y = 96 + rng.gen_range(0..32) * 2 as usize;
+		world.img[(x, y)] = CPMCell(i);
+	}
+	let mut model = ExampleCPM::new(0.1, 0.1, 150, 0.1, 150, 0.05, &world);
 
 	let mut running = false;
 	let mut speed = 1;

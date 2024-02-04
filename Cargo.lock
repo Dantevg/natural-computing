@@ -366,6 +366,7 @@ name = "cpm"
 version = "0.1.0"
 dependencies = [
  "cellular-automata",
+ "loop9",
  "rand",
 ]
 

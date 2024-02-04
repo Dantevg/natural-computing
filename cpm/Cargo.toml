@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 cellular-automata = { path = "../cellular-automata" }
 rand = "0.8.5"
+loop9 = "0.1.5"
