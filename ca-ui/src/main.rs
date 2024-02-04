@@ -7,6 +7,10 @@ use cellular_automata::{
 	world::World,
 	Automaton,
 };
+use cpm::{
+	example::{CPMCell, ExampleCPM},
+	CPM,
+};
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -17,30 +21,25 @@ use winit::{
 	window::WindowBuilder,
 };
 
-const WIDTH: usize = 800 * 2;
-const HEIGHT: usize = 450 * 2;
-const SCALE: usize = 1;
+const WIDTH: usize = 256;
+const HEIGHT: usize = 256;
+const SCALE: usize = 4;
 
 fn main() {
-	// let automaton = Sir::new(0.15);
-	let automaton = GameOfLife;
+	let model = ExampleCPM::new(0.5, 0.5);
+	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
+		|_| {
+			if rand::random::<bool>() {
+				CPMCell(0xff)
+			} else {
+				CPMCell(0x00)
+			}
+		},
+		true,
+	);
 
-	let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
-	let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|_| rand::random(), true);
-	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(|i| i == middle_idx, false);
-	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
-	// 	|i| {
-	// 		if i == middle_idx {
-	// 			SirState::Infected
-	// 		} else {
-	// 			SirState::default()
-	// 		}
-	// 	},
-	// 	false,
-	// );
-
-	let mut running = true;
-	let mut speed = 8;
+	let mut running = false;
+	let mut speed = 1;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
@@ -74,7 +73,7 @@ fn main() {
 						let start_time = Instant::now();
 						if running {
 							for _ in 0..speed {
-								automaton.step(&mut world);
+								model.step(&mut world);
 							}
 							window.request_redraw();
 						}
@@ -82,12 +81,14 @@ fn main() {
 						world.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
-						println!(
-							"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
-							update_time.duration_since(start_time).as_millis(),
-							update_time.duration_since(start_time).as_millis() / speed,
-							draw_time.duration_since(start_time).as_millis()
-						)
+						if running {
+							println!(
+								"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
+								update_time.duration_since(start_time).as_millis(),
+								update_time.duration_since(start_time).as_millis() / speed,
+								draw_time.duration_since(start_time).as_millis()
+							)
+						}
 					}
 					WindowEvent::KeyboardInput { event, .. } => match event
 						.key_without_modifiers()
@@ -108,7 +109,13 @@ fn main() {
 						Key::Named(NamedKey::ArrowRight)
 							if event.state == ElementState::Pressed && !running =>
 						{
-							automaton.step(&mut world);
+							let start_time = Instant::now();
+							model.step(&mut world);
+							let update_time = Instant::now();
+							println!(
+								"update: {:4}us",
+								update_time.duration_since(start_time).as_micros()
+							);
 							window.request_redraw();
 						}
 						_ => (),

@@ -60,15 +60,10 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		self.img = new_img;
 	}
 
-	pub fn metropolis<F>(&mut self, mut rule: F)
+	pub fn metropolis<F>(&mut self, mut p_copy: F)
 	where
-		F: FnMut(C, C) -> C,
+		F: FnMut(&Self, C, C, usize, usize) -> f32,
 	{
-		if self.wrap {
-			self.wrap_edges();
-		}
-
-		let mut new_img = self.img.clone();
 		for _ in 0..W * H {
 			let mut rng = rand::thread_rng();
 			let src_idx = rng.gen_range(0..(W * H));
@@ -77,16 +72,20 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 			let dest = self.get_cell(dest_idx);
 
 			if src != dest {
-				new_img[(dest_idx % W, dest_idx / W)] = rule(src, dest);
+				if rand::random::<f32>() < p_copy(self, src, dest, src_idx, dest_idx) {
+					// TODO: check that this update really needs to be sequential
+					self.img[(dest_idx % W, dest_idx / W)] = src;
+				}
 			}
 		}
-		self.img = new_img;
 	}
 
+	#[inline(always)]
 	pub fn get_cell(&self, idx: usize) -> C {
 		self.img[(idx % W, idx / W)]
 	}
 
+	#[inline(always)]
 	pub fn get_cell_mut(&mut self, idx: usize) -> &mut C {
 		&mut self.img[(idx % W, idx / W)]
 	}
