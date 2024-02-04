@@ -25,7 +25,7 @@ where
 		let neighbourhood = world.get_neighbours_idx(dest_idx);
 		let mut src_perim_delta = 0;
 		let mut dest_perim_delta = 0;
-		for &idx in neighbourhood.into_iter() {
+		for &idx in neighbourhood.iter() {
 			let n = world.get_cell(idx);
 			src_perim_delta += if n == src { -1 } else { 1 };
 			dest_perim_delta += if n == dest { 1 } else { -1 };

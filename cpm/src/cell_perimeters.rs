@@ -33,7 +33,7 @@ impl CellPerimeters {
 		let neighbourhood = world.get_neighbours_idx(dest_idx);
 		let mut n_new = 0;
 		let mut n_old = 0;
-		for neighbour in neighbourhood.into_iter().map(|&i| world.get_cell(i)) {
+		for neighbour in neighbourhood.iter().map(|&i| world.get_cell(i)) {
 			n_new += (neighbour != src) as u32;
 			n_old += (neighbour != dest) as u32;
 			if !neighbour.is_bg() {

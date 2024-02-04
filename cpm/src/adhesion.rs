@@ -12,7 +12,7 @@ where
 	fn adhesion(&self, world: &World<W, H, Self::C>, idx: usize, cell: Self::C) -> f32 {
 		world
 			.get_neighbours_idx(idx)
-			.into_iter()
+			.iter()
 			.filter(|&neigh_idx| world.get_cell(*neigh_idx) != cell)
 			.map(|&neigh_idx| self.get_adhesion_penalty(cell, world.get_cell(neigh_idx)))
 			.sum()

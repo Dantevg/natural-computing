@@ -35,8 +35,8 @@ fn main() {
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
 	let mut rng = rand::thread_rng();
 	for i in 1..32 {
-		let x = 96 + rng.gen_range(0..32) * 2 as usize;
-		let y = 96 + rng.gen_range(0..32) * 2 as usize;
+		let x = (96 + rng.gen_range(0..32) * 2) as usize;
+		let y = (96 + rng.gen_range(0..32) * 2) as usize;
 		world.img[(x, y)] = ExampleCell(i);
 	}
 	let mut model = ExampleCPM::new(0.1, 0.1, 150, 0.1, 150, 0.05, &world);

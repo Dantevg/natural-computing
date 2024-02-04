@@ -106,7 +106,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 			self.get_neighbour_idx(cell_idx, W as isize + 1),
 		]
 		.into_iter()
-		.filter_map(|idx| idx)
+		.flatten()
 		.collect()
 	}
 
@@ -116,7 +116,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		} else {
 			cell_idx
 				.checked_add_signed(offset)
-				.filter(|idx| (0..(W * H)).contains(&idx))
+				.filter(|idx| (0..(W * H)).contains(idx))
 		}
 	}
 
