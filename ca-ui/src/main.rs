@@ -33,15 +33,26 @@ fn main() {
 	// 	true,
 	// );
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
-	let mut rng = rand::thread_rng();
-	for i in 1..32 {
-		let x = (96 + rng.gen_range(0..32) * 2) as usize;
-		let y = (96 + rng.gen_range(0..32) * 2) as usize;
-		world.img[(x, y)] = ExampleCell(i);
-	}
-	let mut model = ExampleCPM::new(0.1, 0.1, 150, 0.1, 150, 0.05, &world);
+	// let mut rng = rand::thread_rng();
+	// for i in 1..32 {
+	// 	let x = (96 + rng.gen_range(0..32) * 2) as usize;
+	// 	let y = (96 + rng.gen_range(0..32) * 2) as usize;
+	// 	world.img[(x, y)] = ExampleCell(i);
+	// }
+	world.img[(WIDTH / 2, HEIGHT / 2)] = ExampleCell(31, 0);
+	let mut model = ExampleCPM::new(
+		0.1,   // these comments are here to keep the parameters on separate lines
+		0.1,   //
+		150,   //
+		0.1,   //
+		140,   //
+		0.1,   //
+		30,    //
+		300.0, //
+		&world,
+	);
 
-	let mut running = false;
+	let mut running = true;
 	let mut speed = 1;
 
 	let event_loop = EventLoop::new().unwrap();
