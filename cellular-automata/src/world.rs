@@ -6,27 +6,24 @@ use crate::Cell;
 
 pub struct World<const W: usize, const H: usize, C: Cell> {
 	pub img: Img<Vec<C>>,
-	pub wrap: bool,
 }
 
 impl<const W: usize, const H: usize, C: Cell + Default> Default for World<W, H, C> {
 	fn default() -> Self {
 		Self {
 			img: Img::new(vec![C::default(); W * H], W, H),
-			wrap: true,
 		}
 	}
 }
 
 impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
-	pub fn from_fn<F>(function: F, wrap: bool) -> Self
+	pub fn from_fn<F>(function: F) -> Self
 	where
 		F: FnMut(usize) -> C,
 	{
 		let buf = (0..(W * H)).map(function).collect();
 		Self {
 			img: Img::new(buf, W, H),
-			wrap,
 		}
 	}
 
@@ -45,9 +42,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 	where
 		F: FnMut([C; 9]) -> C,
 	{
-		if self.wrap {
-			self.wrap_edges();
-		}
+		self.wrap_edges();
 
 		let mut new_img = self.img.clone();
 		loop9_img(self.img.as_ref(), |x, y, top, mid, bot| {
@@ -72,7 +67,6 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 			let dest = self.get_cell(dest_idx);
 
 			if src != dest {
-				// TODO: check that this update really needs to be sequential
 				self.img[(dest_idx % W, dest_idx / W)] = update(self, src, dest, src_idx, dest_idx);
 			}
 		}
@@ -83,17 +77,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		self.img[(idx % W, idx / W)]
 	}
 
-	#[inline(always)]
-	pub fn get_cell_mut(&mut self, idx: usize) -> &mut C {
-		&mut self.img[(idx % W, idx / W)]
-	}
-
-	pub fn get_neighbour(&self, cell_idx: usize, offset: isize) -> Option<C> {
-		self.get_neighbour_idx(cell_idx, offset)
-			.map(|idx| self.get_cell(idx))
-	}
-
-	pub fn get_neighbours_idx(&self, cell_idx: usize) -> Box<[usize]> {
+	pub fn get_neighbours_idx(&self, cell_idx: usize) -> [usize; 8] {
 		[
 			self.get_neighbour_idx(cell_idx, -(W as isize) - 1),
 			self.get_neighbour_idx(cell_idx, -(W as isize)),
@@ -105,19 +89,10 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 			self.get_neighbour_idx(cell_idx, W as isize),
 			self.get_neighbour_idx(cell_idx, W as isize + 1),
 		]
-		.into_iter()
-		.flatten()
-		.collect()
 	}
 
-	fn get_neighbour_idx(&self, cell_idx: usize, offset: isize) -> Option<usize> {
-		if self.wrap {
-			Some((cell_idx as isize + offset).rem_euclid((W * H) as isize) as usize)
-		} else {
-			cell_idx
-				.checked_add_signed(offset)
-				.filter(|idx| (0..(W * H)).contains(idx))
-		}
+	fn get_neighbour_idx(&self, cell_idx: usize, offset: isize) -> usize {
+		(cell_idx as isize + offset).rem_euclid((W * H) as isize) as usize
 	}
 
 	/// Wraps the edges of this [`World`] in such a way that this:
