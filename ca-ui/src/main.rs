@@ -57,7 +57,7 @@ fn main() {
 	);
 
 	let mut running = true;
-	let mut speed = 1;
+	let mut speed = 4;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);

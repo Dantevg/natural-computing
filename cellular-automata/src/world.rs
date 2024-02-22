@@ -59,8 +59,8 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 	where
 		F: FnMut(&Self, C, C, usize, usize) -> C,
 	{
+		let mut rng = rand::thread_rng();
 		for _ in 0..W * H {
-			let mut rng = rand::thread_rng();
 			let src_idx = rng.gen_range(0..(W * H));
 			let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
 			let src = self.get_cell(src_idx);

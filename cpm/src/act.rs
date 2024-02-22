@@ -16,7 +16,7 @@ where
 	/// Returns the geometric mean of the activity in the neighbourhood of a cell.
 	fn gm_act(&self, world: &World<W, H, Self::C>, idx: usize) -> f32 {
 		let cell = world.get_cell(idx);
-		let activities: Vec<_> = world
+		world
 			.get_neighbours_idx(idx)
 			.iter()
 			.filter_map(|&neigh_idx| {
@@ -27,8 +27,7 @@ where
 					None
 				}
 			})
-			.collect();
-		geometric_mean(&activities)
+			.geometric_mean()
 	}
 
 	/// Returns the delta act energy for copying the cell at `src_idx` into
@@ -45,9 +44,13 @@ where
 	}
 }
 
-fn geometric_mean(slice: &[f32]) -> f32 {
-	slice
-		.iter()
-		.fold(1.0, |a, b| a * b)
-		.powf(1.0 / slice.len() as f32)
+trait GeometricMean {
+	fn geometric_mean(self) -> f32;
+}
+
+impl<T: Iterator<Item = f32>> GeometricMean for T {
+	fn geometric_mean(self) -> f32 {
+		let (len, x) = self.fold((0, 1.0), |(n, a), b| (n + 1, a * b));
+		x.powf(1.0 / len as f32)
+	}
 }
