@@ -34,7 +34,11 @@ impl CPMCell for ExampleCell {
 impl Cell for ExampleCell {
 	#[inline(always)]
 	fn colour(&self) -> [u8; 4] {
-		[self.1, (self.0 % 8) * 32, (self.0 % 8) * 32, 0xff]
+		if self.is_bg() {
+			[0xff, 0xff, 0xff, 0xff]
+		} else {
+			[self.1 * (255 / 80), 0x00, 0x00, 0xff]
+		}
 	}
 }
 

@@ -6,7 +6,6 @@ use cpm::{
 	CPM,
 };
 use pixels::{Pixels, SurfaceTexture};
-use rand::Rng;
 use winit::{
 	dpi::PhysicalSize,
 	event::{ElementState, Event, WindowEvent},
@@ -16,9 +15,9 @@ use winit::{
 	window::WindowBuilder,
 };
 
-const WIDTH: usize = 256;
-const HEIGHT: usize = 256;
-const SCALE: usize = 4;
+const WIDTH: usize = 200;
+const HEIGHT: usize = 200;
+const SCALE: usize = 3;
 
 fn main() {
 	// let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
@@ -39,15 +38,20 @@ fn main() {
 	// 	let y = (96 + rng.gen_range(0..32) * 2) as usize;
 	// 	world.img[(x, y)] = ExampleCell(i);
 	// }
-	world.img[(WIDTH / 2, HEIGHT / 2)] = ExampleCell(31, 0);
+	for x in 0..12 {
+		for y in 0..12 {
+			world.img[(x * WIDTH / 12, y * HEIGHT / 12)] =
+				ExampleCell(x as u8 * 12 + y as u8 + 1, 80);
+		}
+	}
 	let mut model = ExampleCPM::new(
-		0.1,   // these comments are here to keep the parameters on separate lines
-		0.1,   //
-		150,   //
-		0.1,   //
-		140,   //
-		0.1,   //
-		30,    //
+		20.0,  // these comments are here to keep the parameters on separate lines
+		20.0,  //
+		200,   //
+		50.0,  //
+		180,   //
+		2.0,   //
+		80,    //
 		300.0, //
 		&world,
 	);
