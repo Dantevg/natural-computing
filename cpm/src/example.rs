@@ -171,9 +171,9 @@ impl<const W: usize, const H: usize> Volume<W, H> for ExampleCPM {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
 		} else if cell.is_obstacle() {
-			self.lambda_volume * (volume - self.target_volume / 2).pow(2) as f32
+			self.lambda_volume * (volume as f32 - self.target_volume as f32 / 2.0).powi(2)
 		} else {
-			self.lambda_volume * (volume - self.target_volume).pow(2) as f32
+			self.lambda_volume * (volume as f32 - self.target_volume as f32).powi(2)
 		}
 	}
 
@@ -187,9 +187,9 @@ impl<const W: usize, const H: usize> Perimeter<W, H> for ExampleCPM {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
 		} else if cell.is_obstacle() {
-			self.lambda_perimeter * perimeter.pow(2) as f32
+			self.lambda_perimeter * (perimeter as f32).powi(2)
 		} else {
-			self.lambda_perimeter * (perimeter - self.target_perimeter).pow(2) as f32
+			self.lambda_perimeter * (perimeter as f32 - self.target_perimeter as f32).powi(2)
 		}
 	}
 

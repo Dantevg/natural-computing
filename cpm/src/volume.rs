@@ -26,8 +26,8 @@ where
 		let dest_vol = self.volume(world, dest_idx, dest);
 		let src_gain =
 			self.get_volume_penalty(src, src_vol + 1) - self.get_volume_penalty(src, src_vol);
-		let dest_loss =
-			self.get_volume_penalty(dest, dest_vol - 1) - self.get_volume_penalty(dest, dest_vol);
+		let dest_loss = self.get_volume_penalty(dest, dest_vol.saturating_sub(1))
+			- self.get_volume_penalty(dest, dest_vol);
 		src_gain + dest_loss
 	}
 }
