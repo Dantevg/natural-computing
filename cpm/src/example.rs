@@ -11,15 +11,24 @@ use crate::{
 };
 
 #[derive(Clone, Copy, Default, Eq, Debug)]
-pub struct ExampleCell(pub u8, pub u8);
+pub struct ExampleCell(pub u8, pub u8, pub bool);
+
+impl ExampleCell {
+	#[inline(always)]
+	pub fn is_obstacle(&self) -> bool {
+		self.2
+	}
+}
 
 impl PartialEq for ExampleCell {
 	fn eq(&self, other: &Self) -> bool {
-		self.0 == other.0
+		self.0 == other.0 && self.2 == other.2
 	}
 }
 
 impl CPMCell for ExampleCell {
+	const MAX_ID: usize = u8::MAX as usize * 2;
+
 	#[inline(always)]
 	fn is_bg(&self) -> bool {
 		self.0 == 0
@@ -27,7 +36,7 @@ impl CPMCell for ExampleCell {
 
 	#[inline(always)]
 	fn id(&self) -> usize {
-		self.0 as usize
+		self.0 as usize + (self.2 as usize * 256)
 	}
 }
 
@@ -36,6 +45,8 @@ impl Cell for ExampleCell {
 	fn colour(&self) -> [u8; 4] {
 		if self.is_bg() {
 			[0xff, 0xff, 0xff, 0xff]
+		} else if self.is_obstacle() {
+			[0x88, 0x88, 0x88, 0xff]
 		} else {
 			[self.1 * (255 / 80), 0x00, 0x00, 0xff]
 		}
@@ -112,7 +123,7 @@ impl<const W: usize, const H: usize> CPM<W, H> for ExampleCPM {
 		if src.is_bg() {
 			src
 		} else {
-			ExampleCell(src.0, self.max_act)
+			ExampleCell(src.0, self.max_act, src.2)
 		}
 	}
 
@@ -142,8 +153,12 @@ impl<const W: usize, const H: usize> CPM<W, H> for ExampleCPM {
 
 impl<const W: usize, const H: usize> Adhesion<W, H> for ExampleCPM {
 	#[inline(always)]
-	fn get_adhesion_penalty(&self, _a: ExampleCell, _b: ExampleCell) -> f32 {
-		self.adhesion_penalty
+	fn get_adhesion_penalty(&self, a: ExampleCell, b: ExampleCell) -> f32 {
+		if a.is_obstacle() != b.is_obstacle() && !a.is_bg() && !b.is_bg() {
+			self.adhesion_penalty * 10.0
+		} else {
+			self.adhesion_penalty
+		}
 	}
 }
 
@@ -151,6 +166,8 @@ impl<const W: usize, const H: usize> Volume<W, H> for ExampleCPM {
 	fn get_volume_penalty(&self, cell: ExampleCell, volume: u32) -> f32 {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
+		} else if cell.is_obstacle() {
+			self.lambda_volume * (volume - self.target_volume / 2).pow(2) as f32
 		} else {
 			self.lambda_volume * (volume - self.target_volume).pow(2) as f32
 		}
@@ -165,6 +182,8 @@ impl<const W: usize, const H: usize> Perimeter<W, H> for ExampleCPM {
 	fn get_perimeter_penalty(&self, cell: ExampleCell, perimeter: u32) -> f32 {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
+		} else if cell.is_obstacle() {
+			self.lambda_perimeter * perimeter.pow(2) as f32
 		} else {
 			self.lambda_perimeter * (perimeter - self.target_perimeter).pow(2) as f32
 		}

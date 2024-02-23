@@ -38,10 +38,16 @@ fn main() {
 	// 	let y = (96 + rng.gen_range(0..32) * 2) as usize;
 	// 	world.img[(x, y)] = ExampleCell(i);
 	// }
-	for x in 0..12 {
-		for y in 0..12 {
-			world.img[(x * WIDTH / 12, y * HEIGHT / 12)] =
-				ExampleCell(x as u8 * 12 + y as u8 + 1, 80);
+	for x in 0..5 {
+		for y in 0..5 {
+			world.img[(x * WIDTH / 5, y * HEIGHT / 5)] =
+				ExampleCell(x as u8 * 5 + y as u8 + 1, 80, true);
+		}
+	}
+	for x in 0..13 {
+		for y in 0..13 {
+			world.img[(x * WIDTH / 13 + 8, y * HEIGHT / 13 + 8)] =
+				ExampleCell(x as u8 * 13 + y as u8 + 1, 80, false);
 		}
 	}
 	let mut model = ExampleCPM::new(
@@ -56,8 +62,8 @@ fn main() {
 		&world,
 	);
 
-	let mut running = true;
-	let mut speed = 4;
+	let mut running = false;
+	let mut speed = 8;
 
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
@@ -97,6 +103,7 @@ fn main() {
 						}
 						let update_time = Instant::now();
 						world.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
+						// TODO: render iter number, add keybind to save, option to save after #iter
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
 						if running {

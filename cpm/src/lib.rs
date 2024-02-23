@@ -12,6 +12,8 @@ pub trait CPMCell
 where
 	Self: Cell,
 {
+	const MAX_ID: usize;
+
 	fn is_bg(&self) -> bool;
 	fn id(&self) -> usize;
 }

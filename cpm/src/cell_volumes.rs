@@ -6,7 +6,7 @@ pub struct CellVolumes(Box<[u32]>);
 
 impl CellVolumes {
 	pub fn from_world<const W: usize, const H: usize, C: CPMCell>(world: &World<W, H, C>) -> Self {
-		let mut volumes = vec![0; u8::MAX as usize + 1].into_boxed_slice();
+		let mut volumes = vec![0; C::MAX_ID + 1].into_boxed_slice();
 
 		for cell in world.img.pixels().filter(|c| !c.is_bg()) {
 			volumes[cell.id()] += 1;

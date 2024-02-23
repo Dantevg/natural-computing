@@ -7,7 +7,7 @@ pub struct CellPerimeters(Box<[u32]>);
 
 impl CellPerimeters {
 	pub fn from_world<const W: usize, const H: usize, C: CPMCell>(world: &World<W, H, C>) -> Self {
-		let mut perimeters = vec![0; u8::MAX as usize + 1].into_boxed_slice();
+		let mut perimeters = vec![0; C::MAX_ID + 1].into_boxed_slice();
 
 		// TODO: wrap borders
 
