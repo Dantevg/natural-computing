@@ -11,3 +11,4 @@ cpm = { path = "../cpm" }
 pixels = "0.13"
 winit = { version = "0.29", features = ["rwh_05"] }
 rand = "0.8.5"
+clap = { version = "4.5.1", features = ["derive"] }

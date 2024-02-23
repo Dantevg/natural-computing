@@ -20,24 +20,7 @@ const HEIGHT: usize = 200;
 const SCALE: usize = 3;
 
 fn main() {
-	// let middle_idx = WIDTH * HEIGHT / 2 + WIDTH / 2;
-	// let mut world: World<WIDTH, HEIGHT, _> = World::from_fn(
-	// 	|_| {
-	// 		if rand::random::<bool>() {
-	// 			CPMCell(0xff)
-	// 		} else {
-	// 			CPMCell(0x00)
-	// 		}
-	// 	},
-	// 	true,
-	// );
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
-	// let mut rng = rand::thread_rng();
-	// for i in 1..32 {
-	// 	let x = (96 + rng.gen_range(0..32) * 2) as usize;
-	// 	let y = (96 + rng.gen_range(0..32) * 2) as usize;
-	// 	world.img[(x, y)] = ExampleCell(i);
-	// }
 	for x in 0..5 {
 		for y in 0..5 {
 			world.img[(x * WIDTH / 5, y * HEIGHT / 5)] =
