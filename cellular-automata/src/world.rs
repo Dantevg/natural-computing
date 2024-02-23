@@ -4,6 +4,8 @@ use rand::prelude::*;
 
 use crate::Cell;
 
+pub type Coord = (u32, u32);
+
 pub struct World<const W: usize, const H: usize, C: Cell> {
 	pub img: Img<Vec<C>>,
 }
@@ -47,8 +49,9 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		let mut new_img = self.img.clone();
 		loop9_img(self.img.as_ref(), |x, y, top, mid, bot| {
 			let neighbourhood = [
-				top.prev, top.curr, top.next, mid.prev, mid.curr, mid.next, bot.prev, bot.curr,
-				bot.next,
+				top.prev, top.curr, top.next, // comments to prevent auto-formatting
+				mid.prev, mid.curr, mid.next, //
+				bot.prev, bot.curr, bot.next, //
 			];
 			new_img[(x, y)] = rule(neighbourhood);
 		});
@@ -57,42 +60,60 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 
 	pub fn metropolis<F>(&mut self, mut update: F)
 	where
-		F: FnMut(&Self, C, C, usize, usize) -> C,
+		F: FnMut(&Self, C, C, Coord, Coord) -> C,
 	{
 		let mut rng = rand::thread_rng();
 		for _ in 0..W * H {
-			let src_idx = rng.gen_range(0..(W * H));
+			let src_idx = (rng.gen_range(0..W as u32), rng.gen_range(0..H as u32));
 			let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
-			let src = self.get_cell(src_idx);
-			let dest = self.get_cell(dest_idx);
+			let src = self.img[src_idx];
+			let dest = self.img[dest_idx];
 
 			if src != dest {
-				self.img[(dest_idx % W, dest_idx / W)] = update(self, src, dest, src_idx, dest_idx);
+				self.img[dest_idx] = update(self, src, dest, src_idx, dest_idx);
 			}
 		}
 	}
 
 	#[inline(always)]
-	pub fn get_cell(&self, idx: usize) -> C {
-		self.img[(idx % W, idx / W)]
+	pub fn get_cell(&self, idx: Coord) -> C {
+		self.img[idx]
 	}
 
-	pub fn get_neighbours_idx(&self, cell_idx: usize) -> [usize; 8] {
+	pub fn get_neighbours(&self, cell_idx: Coord) -> [C; 8] {
 		[
-			self.get_neighbour_idx(cell_idx, -(W as isize) - 1),
-			self.get_neighbour_idx(cell_idx, -(W as isize)),
-			self.get_neighbour_idx(cell_idx, -(W as isize) + 1),
-			self.get_neighbour_idx(cell_idx, -1),
+			self.img[self.get_neighbour_idx(cell_idx, (-1, -1))],
+			self.img[self.get_neighbour_idx(cell_idx, (0, -1))],
+			self.img[self.get_neighbour_idx(cell_idx, (1, -1))],
+			self.img[self.get_neighbour_idx(cell_idx, (-1, 0))],
 			/* ignore self */
-			self.get_neighbour_idx(cell_idx, 1),
-			self.get_neighbour_idx(cell_idx, W as isize - 1),
-			self.get_neighbour_idx(cell_idx, W as isize),
-			self.get_neighbour_idx(cell_idx, W as isize + 1),
+			self.img[self.get_neighbour_idx(cell_idx, (1, 0))],
+			self.img[self.get_neighbour_idx(cell_idx, (-1, 1))],
+			self.img[self.get_neighbour_idx(cell_idx, (0, 1))],
+			self.img[self.get_neighbour_idx(cell_idx, (1, 1))],
 		]
 	}
 
-	fn get_neighbour_idx(&self, cell_idx: usize, offset: isize) -> usize {
-		(cell_idx as isize + offset).rem_euclid((W * H) as isize) as usize
+	fn get_neighbours_idx(&self, cell_idx: Coord) -> [Coord; 8] {
+		[
+			self.get_neighbour_idx(cell_idx, (-1, -1)),
+			self.get_neighbour_idx(cell_idx, (0, -1)),
+			self.get_neighbour_idx(cell_idx, (1, -1)),
+			self.get_neighbour_idx(cell_idx, (-1, 0)),
+			/* ignore self */
+			self.get_neighbour_idx(cell_idx, (1, 0)),
+			self.get_neighbour_idx(cell_idx, (-1, 1)),
+			self.get_neighbour_idx(cell_idx, (0, 1)),
+			self.get_neighbour_idx(cell_idx, (1, 1)),
+		]
+	}
+
+	#[inline(always)]
+	fn get_neighbour_idx(&self, cell_idx: Coord, offset: (i32, i32)) -> Coord {
+		(
+			(cell_idx.0 as i32 + offset.0).rem_euclid(W as i32) as u32,
+			(cell_idx.1 as i32 + offset.1).rem_euclid(H as i32) as u32,
+		)
 	}
 
 	/// Wraps the edges of this [`World`] in such a way that this:

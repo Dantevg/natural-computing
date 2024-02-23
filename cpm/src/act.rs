@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 
 use crate::CPM;
 
@@ -14,13 +14,12 @@ where
 	fn get_act_penalty(&self, activity_delta: f32) -> f32;
 
 	/// Returns the geometric mean of the activity in the neighbourhood of a cell.
-	fn gm_act(&self, world: &World<W, H, Self::C>, idx: usize) -> f32 {
+	fn gm_act(&self, world: &World<W, H, Self::C>, idx: Coord) -> f32 {
 		let cell = world.get_cell(idx);
 		world
-			.get_neighbours_idx(idx)
+			.get_neighbours(idx)
 			.iter()
-			.filter_map(|&neigh_idx| {
-				let neigh = world.get_cell(neigh_idx);
+			.filter_map(|&neigh| {
 				if neigh == cell {
 					Some(neigh.get_activity() as f32)
 				} else {
@@ -37,8 +36,8 @@ where
 		world: &World<W, H, Self::C>,
 		_src: Self::C,
 		_dest: Self::C,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32 {
 		self.get_act_penalty(self.gm_act(world, src_idx) - self.gm_act(world, dest_idx))
 	}

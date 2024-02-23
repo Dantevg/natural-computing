@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 
 use crate::CPM;
 
@@ -9,12 +9,12 @@ where
 	fn get_adhesion_penalty(&self, a: Self::C, b: Self::C) -> f32;
 
 	/// Returns the adhesion energy for a single cell.
-	fn adhesion(&self, world: &World<W, H, Self::C>, idx: usize, cell: Self::C) -> f32 {
+	fn adhesion(&self, world: &World<W, H, Self::C>, idx: Coord, cell: Self::C) -> f32 {
 		world
-			.get_neighbours_idx(idx)
+			.get_neighbours(idx)
 			.iter()
-			.filter(|&neigh_idx| world.get_cell(*neigh_idx) != cell)
-			.map(|&neigh_idx| self.get_adhesion_penalty(cell, world.get_cell(neigh_idx)))
+			.filter(|&neigh| *neigh != cell)
+			.map(|&neigh| self.get_adhesion_penalty(cell, neigh))
 			.sum()
 	}
 
@@ -25,8 +25,8 @@ where
 		world: &World<W, H, Self::C>,
 		src: Self::C,
 		dest: Self::C,
-		_src_idx: usize,
-		dest_idx: usize,
+		_src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32 {
 		self.adhesion(world, dest_idx, src) - self.adhesion(world, dest_idx, dest)
 	}

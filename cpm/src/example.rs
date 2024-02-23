@@ -1,4 +1,7 @@
-use cellular_automata::{world::World, Cell};
+use cellular_automata::{
+	world::{Coord, World},
+	Cell,
+};
 
 use crate::{
 	act::{Act, ActCell},
@@ -21,6 +24,7 @@ impl ExampleCell {
 }
 
 impl PartialEq for ExampleCell {
+	#[inline(always)]
 	fn eq(&self, other: &Self) -> bool {
 		self.0 == other.0 && self.2 == other.2
 	}
@@ -113,8 +117,8 @@ impl<const W: usize, const H: usize> CPM<W, H> for ExampleCPM {
 		world: &World<W, H, ExampleCell>,
 		src: ExampleCell,
 		dest: ExampleCell,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> ExampleCell {
 		self.cell_volumes
 			.update(world, src, dest, src_idx, dest_idx);
@@ -132,8 +136,8 @@ impl<const W: usize, const H: usize> CPM<W, H> for ExampleCPM {
 		world: &World<W, H, ExampleCell>,
 		src: ExampleCell,
 		dest: ExampleCell,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32 {
 		let adhesion = self.adhesion_delta(world, src, dest, src_idx, dest_idx);
 		let volume = self.volume_delta(world, src, dest, src_idx, dest_idx);
@@ -173,7 +177,7 @@ impl<const W: usize, const H: usize> Volume<W, H> for ExampleCPM {
 		}
 	}
 
-	fn volume(&self, _world: &World<W, H, ExampleCell>, _idx: usize, state: ExampleCell) -> u32 {
+	fn volume(&self, _world: &World<W, H, ExampleCell>, _idx: Coord, state: ExampleCell) -> u32 {
 		self.cell_volumes.get(state)
 	}
 }
@@ -189,7 +193,7 @@ impl<const W: usize, const H: usize> Perimeter<W, H> for ExampleCPM {
 		}
 	}
 
-	fn perimeter(&self, _world: &World<W, H, ExampleCell>, _idx: usize, state: ExampleCell) -> u32 {
+	fn perimeter(&self, _world: &World<W, H, ExampleCell>, _idx: Coord, state: ExampleCell) -> u32 {
 		self.cell_perimeters.get(state)
 	}
 }

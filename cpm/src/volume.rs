@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 
 use crate::CPM;
 
@@ -10,7 +10,7 @@ where
 
 	/// Returns the volume in the number of grid cells for a single cell, if
 	/// that grid cell were to have the given `state`.
-	fn volume(&self, world: &World<W, H, Self::C>, idx: usize, state: Self::C) -> u32;
+	fn volume(&self, world: &World<W, H, Self::C>, idx: Coord, state: Self::C) -> u32;
 
 	/// Returns the delta volume energy for copying the cell at `src_idx` into
 	/// `dest_idx`.
@@ -19,8 +19,8 @@ where
 		world: &World<W, H, Self::C>,
 		src: Self::C,
 		dest: Self::C,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32 {
 		let src_vol = self.volume(world, src_idx, src);
 		let dest_vol = self.volume(world, dest_idx, dest);

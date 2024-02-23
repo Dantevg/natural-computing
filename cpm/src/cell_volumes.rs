@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 
 use crate::CPMCell;
 
@@ -20,8 +20,8 @@ impl CellVolumes {
 		_world: &World<W, H, C>,
 		src: C,
 		dest: C,
-		_src_idx: usize,
-		_dest_idx: usize,
+		_src_idx: Coord,
+		_dest_idx: Coord,
 	) {
 		if !src.is_bg() {
 			self.0[src.id()] += 1
@@ -31,6 +31,7 @@ impl CellVolumes {
 		}
 	}
 
+	#[inline(always)]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]
 	}

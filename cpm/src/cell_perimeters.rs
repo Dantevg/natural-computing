@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 use loop9::loop9_img;
 
 use crate::CPMCell;
@@ -27,13 +27,12 @@ impl CellPerimeters {
 		world: &World<W, H, C>,
 		src: C,
 		dest: C,
-		_src_idx: usize,
-		dest_idx: usize,
+		_src_idx: Coord,
+		dest_idx: Coord,
 	) {
-		let neighbourhood = world.get_neighbours_idx(dest_idx);
 		let mut n_new = 0;
 		let mut n_old = 0;
-		for neighbour in neighbourhood.iter().map(|&i| world.get_cell(i)) {
+		for neighbour in world.get_neighbours(dest_idx) {
 			n_new += (neighbour != src) as u32;
 			n_old += (neighbour != dest) as u32;
 			if !neighbour.is_bg() {
@@ -49,6 +48,7 @@ impl CellPerimeters {
 		}
 	}
 
+	#[inline(always)]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]
 	}

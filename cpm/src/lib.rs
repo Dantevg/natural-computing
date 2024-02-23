@@ -6,7 +6,10 @@ pub mod example;
 pub mod perimeter;
 pub mod volume;
 
-use cellular_automata::{world::World, Cell};
+use cellular_automata::{
+	world::{Coord, World},
+	Cell,
+};
 
 pub trait CPMCell
 where
@@ -25,8 +28,8 @@ pub trait CPM<const W: usize, const H: usize> {
 		world: &World<W, H, Self::C>,
 		src: Self::C,
 		dest: Self::C,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32;
 
 	fn get_temperature(&self) -> f32;
@@ -36,8 +39,8 @@ pub trait CPM<const W: usize, const H: usize> {
 		_world: &World<W, H, Self::C>,
 		src: Self::C,
 		_dest: Self::C,
-		_src_idx: usize,
-		_dest_idx: usize,
+		_src_idx: Coord,
+		_dest_idx: Coord,
 	) -> Self::C {
 		src
 	}

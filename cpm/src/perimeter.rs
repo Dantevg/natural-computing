@@ -1,4 +1,4 @@
-use cellular_automata::world::World;
+use cellular_automata::world::{Coord, World};
 
 use crate::CPM;
 
@@ -10,7 +10,7 @@ where
 
 	/// Returns the perimeter in the number of grid cells for a single cell, if
 	/// that grid cell were to have the given `state`.
-	fn perimeter(&self, world: &World<W, H, Self::C>, idx: usize, state: Self::C) -> u32;
+	fn perimeter(&self, world: &World<W, H, Self::C>, idx: Coord, state: Self::C) -> u32;
 
 	/// Returns the delta perimeter energy for copying the cell at `src_idx` into
 	/// `dest_idx`.
@@ -19,14 +19,13 @@ where
 		world: &World<W, H, Self::C>,
 		src: Self::C,
 		dest: Self::C,
-		src_idx: usize,
-		dest_idx: usize,
+		src_idx: Coord,
+		dest_idx: Coord,
 	) -> f32 {
-		let neighbourhood = world.get_neighbours_idx(dest_idx);
+		let neighbourhood = world.get_neighbours(dest_idx);
 		let mut src_perim_delta = 0;
 		let mut dest_perim_delta = 0;
-		for &idx in neighbourhood.iter() {
-			let n = world.get_cell(idx);
+		for n in neighbourhood {
 			src_perim_delta += if n == src { -1 } else { 1 };
 			dest_perim_delta += if n == dest { 1 } else { -1 };
 		}
