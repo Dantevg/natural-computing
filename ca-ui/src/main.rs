@@ -23,7 +23,7 @@ use winit::{
 
 const WIDTH: usize = 200;
 const HEIGHT: usize = 200;
-const SCALE: usize = 4;
+const SCALE: usize = 3;
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -63,6 +63,9 @@ struct Args {
 
 	#[arg(long, default_value_t = 300.0)]
 	l_act: f32,
+
+	#[arg(short, long, default_value_t = false)]
+	verbose: bool,
 }
 
 fn main() {
@@ -145,16 +148,23 @@ fn main() {
 						}
 						let update_time = Instant::now();
 						world.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
-						// TODO: render iter number, add keybind to save, option to save after #iter
 						pixels.render().unwrap();
 						let draw_time = Instant::now();
 						if running {
-							println!(
-								"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
-								update_time.duration_since(start_time).as_millis(),
-								update_time.duration_since(start_time).as_millis() / speed,
-								draw_time.duration_since(start_time).as_millis()
-							)
+							if args.verbose {
+								println!(
+									"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
+									update_time.duration_since(start_time).as_millis(),
+									update_time.duration_since(start_time).as_millis() / speed,
+									draw_time.duration_since(start_time).as_millis()
+								)
+							} else {
+								print!(
+									"update: {:3}ms ({:2}ms/i)\ti: {iter}\r",
+									update_time.duration_since(start_time).as_millis(),
+									update_time.duration_since(start_time).as_millis() / speed,
+								)
+							}
 						}
 					}
 					WindowEvent::KeyboardInput { event, .. } => match event
