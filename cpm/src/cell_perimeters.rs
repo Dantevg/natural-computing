@@ -22,6 +22,7 @@ impl CellPerimeters {
 		Self(perimeters)
 	}
 
+	// Ported from https://github.com/ingewortel/artistoo/blob/master/src/hamiltonian/PerimeterConstraint.js
 	pub fn update<const W: usize, const H: usize, C: CPMCell>(
 		&mut self,
 		world: &World<W, H, C>,

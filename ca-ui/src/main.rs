@@ -1,12 +1,15 @@
+mod cli;
+
 use std::{
 	fs::{create_dir, File},
 	io::BufWriter,
-	path::PathBuf,
 	time::Instant,
 };
 
 use cellular_automata::world::World;
-use clap::Parser;
+
+use clap::Parser as _;
+use cli::Args;
 use cpm::{
 	example::{ExampleCPM, ExampleCell},
 	CPM,
@@ -25,69 +28,10 @@ const WIDTH: usize = 200;
 const HEIGHT: usize = 200;
 const SCALE: usize = 3;
 
-#[derive(Parser)]
-#[command(author, version, about)]
-struct Args {
-	#[arg(short, long, value_name = "FILE")]
-	output: Option<PathBuf>,
-
-	#[arg(long, value_name = "ITERATIONS", default_value_t = 0)]
-	save_interval: u32,
-
-	#[arg(long, default_value_t = 13)]
-	cell_grid: usize,
-
-	#[arg(long, default_value_t = 5)]
-	obstacle_grid: usize,
-
-	#[arg(long, default_value_t = 20.0)]
-	temp: f32,
-
-	#[arg(long, default_value_t = 20.0)]
-	l_adhesion: f32,
-
-	#[arg(long, default_value_t = 200)]
-	volume: u32,
-
-	#[arg(long, default_value_t = 50.0)]
-	l_volume: f32,
-
-	#[arg(long, default_value_t = 180)]
-	perimeter: u32,
-
-	#[arg(long, default_value_t = 2.0)]
-	l_perimeter: f32,
-
-	#[arg(long, default_value_t = 80)]
-	max_act: u8,
-
-	#[arg(long, default_value_t = 300.0)]
-	l_act: f32,
-
-	#[arg(short, long, default_value_t = false)]
-	verbose: bool,
-}
-
 fn main() {
 	let args = Args::parse();
 
-	let mut world: World<WIDTH, HEIGHT, _> = World::default();
-	for x in 0..args.obstacle_grid {
-		for y in 0..args.obstacle_grid {
-			world.img[(
-				x * WIDTH / args.obstacle_grid,
-				y * HEIGHT / args.obstacle_grid,
-			)] = ExampleCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
-		}
-	}
-	for x in 0..args.cell_grid {
-		for y in 0..args.cell_grid {
-			world.img[(
-				x * WIDTH / args.cell_grid + 8,
-				y * HEIGHT / args.cell_grid + 8,
-			)] = ExampleCell((x * args.cell_grid + y + 1) as u8, 80, false);
-		}
-	}
+	let mut world = create_world(&args);
 	let mut model = ExampleCPM::new(
 		args.temp,        // these comments are here to keep the parameters on separate lines
 		args.l_adhesion,  //
@@ -141,7 +85,11 @@ fn main() {
 								if args.output.is_some()
 									&& args.save_interval > 0 && iter % args.save_interval == 0
 								{
+									world.draw(pixels.frame_mut(), WIDTH * SCALE, SCALE);
 									save(&args, &pixels, iter);
+								}
+								if args.iter.is_some_and(|max_iter| iter >= max_iter) {
+									window_target.exit();
 								}
 							}
 							window.request_redraw();
@@ -203,6 +151,27 @@ fn main() {
 			}
 		})
 		.unwrap();
+}
+
+fn create_world(args: &Args) -> World<200, 200, ExampleCell> {
+	let mut world: World<WIDTH, HEIGHT, _> = World::default();
+	for x in 0..args.obstacle_grid {
+		for y in 0..args.obstacle_grid {
+			world.img[(
+				x * WIDTH / args.obstacle_grid,
+				y * HEIGHT / args.obstacle_grid,
+			)] = ExampleCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
+		}
+	}
+	for x in 0..args.cell_grid {
+		for y in 0..args.cell_grid {
+			world.img[(
+				x * WIDTH / args.cell_grid + 8,
+				y * HEIGHT / args.cell_grid + 8,
+			)] = ExampleCell((x * args.cell_grid + y + 1) as u8, 80, false);
+		}
+	}
+	world
 }
 
 fn save(args: &Args, pixels: &Pixels, i: u32) {
