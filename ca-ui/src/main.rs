@@ -2,6 +2,7 @@ mod cli;
 
 use std::{
 	fs::{create_dir, File},
+	path::{Path, PathBuf},
 	time::Instant,
 };
 
@@ -16,16 +17,16 @@ use cpm::{
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
-	event::{ElementState, Event, WindowEvent},
+	event::{ElementState, Event, KeyEvent, WindowEvent},
 	event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
-	keyboard::{Key, NamedKey},
+	keyboard::{Key, ModifiersState, NamedKey},
 	platform::modifier_supplement::KeyEventExtModifierSupplement,
 	window::{Window, WindowBuilder},
 };
 
 const WIDTH: usize = 200;
 const HEIGHT: usize = 200;
-const SCALE: usize = 3;
+const SCALE: usize = 4;
 
 struct Ui<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>> {
 	pub world: World<WIDTH, HEIGHT, C>,
@@ -43,10 +44,12 @@ fn main() {
 
 	let (mut ui, event_loop) = init(&args);
 
+	let mut modifiers = ModifiersState::default();
+
 	event_loop
 		.run(move |event, window_target| {
 			if let Event::WindowEvent { event, .. } = event {
-				handle_window_event(&mut ui, &args, event, window_target)
+				handle_window_event(&mut ui, &args, event, window_target, &mut modifiers)
 			}
 		})
 		.unwrap();
@@ -57,6 +60,7 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 	args: &Args,
 	event: WindowEvent,
 	window_target: &EventLoopWindowTarget<()>,
+	modifiers: &mut ModifiersState,
 ) {
 	match event {
 		WindowEvent::CloseRequested => window_target.exit(),
@@ -70,8 +74,7 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 						&& args.save_interval > 0
 						&& ui.iter % args.save_interval == 0
 					{
-						ui.world.draw(ui.pixels.frame_mut(), WIDTH * SCALE, SCALE);
-						save(args, &ui.pixels, ui.iter);
+						save_image(ui, args);
 					}
 					if args.iter.is_some_and(|max_iter| ui.iter >= max_iter) {
 						window_target.exit();
@@ -86,14 +89,14 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 			if ui.running {
 				if args.verbose {
 					println!(
-						"update: {:3}ms ({:2}ms/i)\ttotal: {:3}ms",
+						"update:{:3}ms ({:2}ms/i) total:{:3}ms",
 						update_time.duration_since(start_time).as_millis(),
 						update_time.duration_since(start_time).as_millis() / ui.speed as u128,
 						draw_time.duration_since(start_time).as_millis()
 					)
 				} else {
 					print!(
-						"update: {:3}ms ({:2}ms/i)\ti: {}\r",
+						"\rupdate:{:3}ms ({:2}ms/i) i:{:6}",
 						update_time.duration_since(start_time).as_millis(),
 						update_time.duration_since(start_time).as_millis() / ui.speed as u128,
 						ui.iter,
@@ -101,22 +104,26 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 				}
 			}
 		}
-		WindowEvent::KeyboardInput { event, .. } => match event.key_without_modifiers().as_ref() {
-			Key::Named(NamedKey::Space) if event.state == ElementState::Pressed => {
+		WindowEvent::KeyboardInput {
+			event: event @ KeyEvent {
+				state: ElementState::Pressed,
+				..
+			},
+			..
+		} => match event.key_without_modifiers().as_ref() {
+			Key::Named(NamedKey::Space) => {
 				ui.running = !ui.running;
 				if ui.running {
 					ui.window.request_redraw();
 				}
 			}
-			Key::Named(NamedKey::ArrowDown) if event.state == ElementState::Pressed => {
+			Key::Named(NamedKey::ArrowDown) => {
 				ui.speed = 1.max(ui.speed / 2);
 			}
-			Key::Named(NamedKey::ArrowUp) if event.state == ElementState::Pressed => {
+			Key::Named(NamedKey::ArrowUp) => {
 				ui.speed *= 2;
 			}
-			Key::Named(NamedKey::ArrowRight)
-				if event.state == ElementState::Pressed && !ui.running =>
-			{
+			Key::Named(NamedKey::ArrowRight) if !ui.running => {
 				let start_time = Instant::now();
 				ui.model.step(&mut ui.world);
 				ui.iter += 1;
@@ -127,10 +134,27 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 				);
 				ui.window.request_redraw();
 			}
+			Key::Character("s") if modifiers.control_key() => {
+				save_image(ui, args);
+			}
 			_ => (),
 		},
+		WindowEvent::ModifiersChanged(new_modifiers) => {
+			*modifiers = new_modifiers.state();
+		}
 		_ => (),
 	}
+}
+
+fn save_image<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(ui: &mut Ui<C, Cpm>, args: &Args) {
+	ui.world.draw(ui.pixels.frame_mut(), WIDTH * SCALE, SCALE);
+	save(
+		&args.output.clone().unwrap_or(PathBuf::new()),
+		&ui.pixels,
+		ui.iter,
+	);
+	// Clear current line and put cursor at beginning of line (in case of non-verbose output)
+	println!("\x1b[1K\rSaved image {}.png", ui.iter)
 }
 
 fn init(args: &Args) -> (Ui<ExampleCell, ExampleCPM>, EventLoop<()>) {
@@ -183,7 +207,7 @@ fn init(args: &Args) -> (Ui<ExampleCell, ExampleCPM>, EventLoop<()>) {
 
 fn create_world(args: &Args) -> World<200, 200, ExampleCell> {
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
-	for x in 0..args.obstacle_grid / 2 {
+	for x in 0..args.obstacle_grid {
 		for y in 0..args.obstacle_grid {
 			world.img[(
 				x * WIDTH / args.obstacle_grid,
@@ -202,17 +226,16 @@ fn create_world(args: &Args) -> World<200, 200, ExampleCell> {
 	world
 }
 
-fn save(args: &Args, pixels: &Pixels, i: u32) {
-	let mut filename = args.output.as_ref().unwrap().clone();
-	if !filename.is_dir() {
-		create_dir(filename.clone()).unwrap();
+fn save(dir: &Path, pixels: &Pixels, i: u32) {
+	if !dir.is_dir() && !dir.as_os_str().is_empty() {
+		create_dir(dir).unwrap();
 	}
-	filename.push(format!("{i}.png"));
+	let filename = dir.join(format!("{i}.png"));
 	let file = File::create(filename).unwrap();
 
 	let mut png_encoder = png::Encoder::new(file, (WIDTH * SCALE) as u32, (HEIGHT * SCALE) as u32);
 	png_encoder.set_color(png::ColorType::Rgba);
 	png_encoder.set_depth(png::BitDepth::Eight);
 	let mut png_writer = png_encoder.write_header().unwrap();
-	png_writer.write_image_data(&pixels.frame()).unwrap();
+	png_writer.write_image_data(pixels.frame()).unwrap();
 }

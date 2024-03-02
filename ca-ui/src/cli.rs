@@ -3,9 +3,20 @@ use std::path::PathBuf;
 use clap::Parser;
 
 #[derive(Parser)]
+#[command(
+	version,
+	about = "Act-CPM
+
+\x1b[1;4mKey bindings:\x1b[0m
+	Space        toggle pause
+	Arrow Down   speed / 2
+	Arrow Up     speed * 2
+	Arrow Right  single step (when paused)
+	Ctrl+S       save image (also see --save-interval)"
+)]
 pub struct Args {
-	/// Path to the output directory. Also specify --save-interval.
-	#[arg(short, long, value_name = "FILE", requires = "save_interval")]
+	/// Path to the output directory. Also see --save-interval.
+	#[arg(short, long, value_name = "DIR")]
 	pub output: Option<PathBuf>,
 
 	/// Interval (in simulation steps) in which to export images. Also specify --output.
