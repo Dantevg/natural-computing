@@ -159,6 +159,7 @@ impl<const W: usize, const H: usize> Adhesion<W, H> for ActCPM {
 	#[inline(always)]
 	fn get_adhesion_penalty(&self, a: ActCPMCell, b: ActCPMCell) -> f32 {
 		if a.is_obstacle() != b.is_obstacle() && !a.is_bg() && !b.is_bg() {
+			// TODO: un-hardcode this
 			self.adhesion_penalty * 10.0
 		} else {
 			self.adhesion_penalty
@@ -171,6 +172,7 @@ impl<const W: usize, const H: usize> Volume<W, H> for ActCPM {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
 		} else if cell.is_obstacle() {
+			// TODO: un-hardcode this
 			self.lambda_volume * (volume as f32 - self.target_volume as f32 / 2.0).powi(2)
 		} else {
 			self.lambda_volume * (volume as f32 - self.target_volume as f32).powi(2)
@@ -187,6 +189,7 @@ impl<const W: usize, const H: usize> Perimeter<W, H> for ActCPM {
 		if cell.is_bg() {
 			0.0 // no penalty for background cells
 		} else if cell.is_obstacle() {
+			// TODO: un-hardcode this
 			self.lambda_perimeter * (perimeter as f32).powi(2)
 		} else {
 			self.lambda_perimeter * (perimeter as f32 - self.target_perimeter as f32).powi(2)

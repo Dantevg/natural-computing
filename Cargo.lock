@@ -20,7 +20,7 @@ checksum = "c71b1793ee61086797f5c80b6efa2b8ffa6d5dd703f118545808a7f2e27f7046"
 
 [[package]]
 name = "act-cpm-ui"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "cellular-automata",
  "cellular-potts-models",
@@ -310,7 +310,7 @@ dependencies = [
 
 [[package]]
 name = "cellular-automata"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "imgref",
  "loop9",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "cellular-potts-models"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "cellular-automata",
  "loop9",
