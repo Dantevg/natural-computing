@@ -1,19 +1,19 @@
+mod act_cpm;
 mod cli;
 
 use std::{
 	fs::{create_dir, File},
-	path::{Path, PathBuf},
+	path::Path,
 	time::Instant,
 };
 
+use act_cpm::{ActCPM, ActCPMCell};
+
 use cellular_automata::world::World;
+use cellular_potts_models::CPM;
 
 use clap::Parser as _;
 use cli::Args;
-use cpm::{
-	example::{ExampleCPM, ExampleCell},
-	CPMCell, CPM,
-};
 use pixels::{Pixels, SurfaceTexture};
 use winit::{
 	dpi::PhysicalSize,
@@ -28,8 +28,8 @@ const WIDTH: usize = 200;
 const HEIGHT: usize = 200;
 const SCALE: usize = 4;
 
-struct Ui<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>> {
-	pub world: World<WIDTH, HEIGHT, C>,
+struct Ui<Cpm: CPM<WIDTH, HEIGHT>> {
+	pub world: World<WIDTH, HEIGHT, Cpm::C>,
 	pub model: Cpm,
 	pub window: Window,
 	pub pixels: Pixels,
@@ -55,8 +55,8 @@ fn main() {
 		.unwrap();
 }
 
-fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
-	ui: &mut Ui<C, Cpm>,
+fn handle_window_event<Cpm: CPM<WIDTH, HEIGHT>>(
+	ui: &mut Ui<Cpm>,
 	args: &Args,
 	event: WindowEvent,
 	window_target: &EventLoopWindowTarget<()>,
@@ -146,10 +146,10 @@ fn handle_window_event<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(
 	}
 }
 
-fn save_image<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(ui: &mut Ui<C, Cpm>, args: &Args) {
+fn save_image<Cpm: CPM<WIDTH, HEIGHT>>(ui: &mut Ui<Cpm>, args: &Args) {
 	ui.world.draw(ui.pixels.frame_mut(), WIDTH * SCALE, SCALE);
 	save(
-		&args.output.clone().unwrap_or(PathBuf::new()),
+		&args.output.clone().unwrap_or_default(),
 		&ui.pixels,
 		ui.iter,
 	);
@@ -157,9 +157,9 @@ fn save_image<C: CPMCell, Cpm: CPM<WIDTH, HEIGHT, C = C>>(ui: &mut Ui<C, Cpm>, a
 	println!("\x1b[1K\rSaved image {}.png", ui.iter)
 }
 
-fn init(args: &Args) -> (Ui<ExampleCell, ExampleCPM>, EventLoop<()>) {
+fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 	let world = create_world(args);
-	let model = ExampleCPM::new(
+	let model = ActCPM::new(
 		args.temp,        // these comments are here to keep the parameters on separate lines
 		args.l_adhesion,  //
 		args.volume,      //
@@ -205,14 +205,14 @@ fn init(args: &Args) -> (Ui<ExampleCell, ExampleCPM>, EventLoop<()>) {
 	(ui, event_loop)
 }
 
-fn create_world(args: &Args) -> World<200, 200, ExampleCell> {
+fn create_world(args: &Args) -> World<200, 200, ActCPMCell> {
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
 	for x in 0..args.obstacle_grid {
 		for y in 0..args.obstacle_grid {
 			world.img[(
 				x * WIDTH / args.obstacle_grid,
 				y * HEIGHT / args.obstacle_grid,
-			)] = ExampleCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
+			)] = ActCPMCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
 		}
 	}
 	for x in 0..args.cell_grid {
@@ -220,7 +220,7 @@ fn create_world(args: &Args) -> World<200, 200, ExampleCell> {
 			world.img[(
 				x * WIDTH / args.cell_grid + 8,
 				y * HEIGHT / args.cell_grid + 8,
-			)] = ExampleCell((x * args.cell_grid + y + 1) as u8, 80, false);
+			)] = ActCPMCell((x * args.cell_grid + y + 1) as u8, 80, false);
 		}
 	}
 	world

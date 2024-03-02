@@ -2,7 +2,6 @@ pub mod act;
 pub mod adhesion;
 pub mod cell_perimeters;
 pub mod cell_volumes;
-pub mod example;
 pub mod perimeter;
 pub mod volume;
 
