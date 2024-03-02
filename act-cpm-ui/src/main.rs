@@ -1,3 +1,6 @@
+// Do not create console window for release builds
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod act_cpm;
 mod cli;
 
