@@ -56,15 +56,4 @@ impl<const N_BOIDS: usize> World<N_BOIDS> {
 	pub fn nearest_neighbour_distances(&self) -> Box<[f32; N_BOIDS]> {
 		todo!()
 	}
-
-	pub fn draw(&self, frame: &mut [u8], frame_width: usize) {
-		for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-			let x = i % frame_width;
-			let y = i / frame_width;
-
-			// if x < W && y < H {
-			// 	pixel.copy_from_slice(&self.img[(x, y)].colour());
-			// }
-		}
-	}
 }

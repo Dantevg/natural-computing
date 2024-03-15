@@ -264,6 +264,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "boids-ui"
+version = "0.1.0"
+dependencies = [
+ "boids",
+ "pixels",
+ "winit",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

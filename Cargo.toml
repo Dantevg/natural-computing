@@ -1,3 +1,3 @@
 [workspace]
-members = ["cellular-automata", "cellular-potts-models", "act-cpm-ui", "boids"]
+members = ["cellular-automata", "cellular-potts-models", "act-cpm-ui", "boids", "boids-ui"]
 resolver = "2"
