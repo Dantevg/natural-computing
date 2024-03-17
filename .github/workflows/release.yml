@@ -27,3 +27,4 @@ jobs:
       with:
         bin: act-cpm-ui,boids-ui
         token: ${{ secrets.GITHUB_TOKEN }}
+        archive: $target
