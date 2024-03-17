@@ -10,8 +10,6 @@ use cli::{Args, Cli};
 use ui::{handle_window_event, init_ui};
 use winit::event::Event;
 
-const N_BOIDS: usize = 300;
-
 fn main() {
 	let args = Args::parse();
 
@@ -20,7 +18,7 @@ fn main() {
 		cohesion_strength: args.cohesion,
 		separation_strength: args.separation,
 	};
-	let mut world: World<N_BOIDS> = World::new(args.width, args.height, params);
+	let mut world: World = World::new(args.width, args.height, args.n_boids, params);
 
 	if let Some(iter) = args.iter {
 		let mut cli = Cli::new(&args);
@@ -44,7 +42,7 @@ fn main() {
 	}
 }
 
-fn save_image(world: &World<N_BOIDS>, frame: &mut [u8], args: &Args) {
+fn save_image(world: &World, frame: &mut [u8], args: &Args) {
 	draw(world, frame, args.width);
 	let path = &args.output.clone().unwrap_or_default();
 	let file = File::create(path).unwrap();
@@ -56,7 +54,7 @@ fn save_image(world: &World<N_BOIDS>, frame: &mut [u8], args: &Args) {
 	png_writer.write_image_data(frame).unwrap();
 }
 
-fn draw(world: &World<N_BOIDS>, frame: &mut [u8], width: u32) {
+fn draw(world: &World, frame: &mut [u8], width: u32) {
 	for pixel in frame.chunks_exact_mut(4) {
 		pixel.copy_from_slice(&[0x00, 0x00, 0x00, 0xff]);
 	}

@@ -1,26 +1,29 @@
-use core::array;
-
 use crate::{boid::Boid, Params};
 
 pub const COHESION_RADIUS: f32 = 50.0;
 pub const SEPARATION_RADIUS: f32 = 20.0;
 
 #[derive(Debug, Clone)]
-pub struct World<const N_BOIDS: usize> {
+pub struct World {
 	pub width: u32,
 	pub height: u32,
-	pub boids: [Boid; N_BOIDS],
+	pub n_boids: u32,
+	pub boids: Box<[Boid]>,
 	pub params: Params,
 }
 
-impl<const N_BOIDS: usize> World<N_BOIDS> {
+impl World {
 	/// Creates a [`World`] with the given `width` and `height`, filled with
 	/// randomly initialised [`Boid`]s.
-	pub fn new(width: u32, height: u32, params: Params) -> Self {
+	pub fn new(width: u32, height: u32, n_boids: u32, params: Params) -> Self {
 		Self {
 			width,
 			height,
-			boids: array::from_fn(|_| Boid::random(width, height)),
+			n_boids,
+			boids: (0..n_boids)
+				.map(|_| Boid::random(width, height))
+				.collect::<Vec<Boid>>()
+				.into_boxed_slice(),
 			params,
 		}
 	}
@@ -54,7 +57,7 @@ impl<const N_BOIDS: usize> World<N_BOIDS> {
 	}
 
 	/// Returns for each [`Boid`] the distance to its nearest neighbour.
-	pub fn nearest_neighbour_distances(&self) -> Box<[f32; N_BOIDS]> {
+	pub fn nearest_neighbour_distances(&self) -> Box<[f32]> {
 		todo!()
 	}
 }

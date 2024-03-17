@@ -28,6 +28,10 @@ pub struct Args {
 	#[arg(short, long, default_value_t = 500)]
 	pub height: u32,
 
+	/// The number of boids
+	#[arg(short, long, default_value_t = 300)]
+	pub n_boids: u32,
+
 	/// The strength of the alignment boid parameter.
 	#[arg(long, default_value_t = 0.1)]
 	pub alignment: f32,

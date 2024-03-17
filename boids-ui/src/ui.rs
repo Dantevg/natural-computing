@@ -11,7 +11,7 @@ use winit::{
 	window::{Window, WindowBuilder},
 };
 
-use crate::{cli::Args, draw, N_BOIDS};
+use crate::{cli::Args, draw};
 
 pub struct Ui {
 	pub window: Window,
@@ -22,7 +22,7 @@ pub struct Ui {
 
 pub fn handle_window_event(
 	ui: &mut Ui,
-	world: &mut World<N_BOIDS>,
+	world: &mut World,
 	args: &Args,
 	event: WindowEvent,
 	window_target: &EventLoopWindowTarget<()>,

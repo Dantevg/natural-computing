@@ -43,7 +43,7 @@ impl Boid {
 	/// Update this [`Boid`]'s position and angle according to boid rules.
 	///
 	/// `dt` is the time in seconds between this update and the previous update.
-	pub fn update<const N_BOIDS: usize>(&mut self, world: &World<N_BOIDS>, dt: f32) {
+	pub fn update(&mut self, world: &World, dt: f32) {
 		let neighbours = world.neighbours(&self, COHESION_RADIUS);
 		let too_close_neighbours = world.neighbours(&self, SEPARATION_RADIUS);
 
