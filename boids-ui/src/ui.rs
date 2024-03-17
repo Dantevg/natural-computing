@@ -34,10 +34,12 @@ pub fn handle_window_event(
 				let start_time = Instant::now();
 				world.update((start_time - ui.prev_update).as_secs_f32());
 				ui.prev_update = start_time;
-				println!(
-					"{:3}ms",
-					Instant::now().duration_since(start_time).as_millis(),
-				);
+				if args.verbose {
+					println!(
+						"{:3}ms",
+						Instant::now().duration_since(start_time).as_millis(),
+					);
+				}
 			}
 			draw(&world, ui.pixels.frame_mut(), args.width);
 			ui.pixels.render().unwrap();
