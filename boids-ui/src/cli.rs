@@ -21,18 +21,6 @@ impl ValueEnum for LogType {
 	}
 }
 
-// impl FromStr for LogType {
-// 	type Err = ();
-
-// 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-// 		match s.to_ascii_lowercase().as_str() {
-// 			"order" => Ok(Self::Order),
-// 			"nndist" => Ok(Self::NNDist),
-// 			_ => Err(()),
-// 		}
-// 	}
-// }
-
 #[derive(Parser)]
 #[command(
 	version,
