@@ -127,10 +127,10 @@ impl<const W: usize, const H: usize> CPM<W, H> for ActCPM {
 		src_idx: Coord,
 		dest_idx: Coord,
 	) -> ActCPMCell {
-		// self.cell_volumes
-		// 	.update(world, src, dest, src_idx, dest_idx);
-		// self.cell_perimeters
-		// 	.update(world, src, dest, src_idx, dest_idx);
+		self.cell_volumes
+			.update(world, src, dest, src_idx, dest_idx);
+		self.cell_perimeters
+			.update(world, src, dest, src_idx, dest_idx);
 		if src.is_bg() {
 			src
 		} else {

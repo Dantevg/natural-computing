@@ -210,23 +210,22 @@ fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 
 fn create_world(args: &Args) -> World<200, 200, ActCPMCell> {
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
-	// for x in 0..args.obstacle_grid {
-	// 	for y in 0..args.obstacle_grid {
-	// 		world.img[(
-	// 			x * WIDTH / args.obstacle_grid,
-	// 			y * HEIGHT / args.obstacle_grid,
-	// 		)] = ActCPMCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
-	// 	}
-	// }
-	// for x in 0..args.cell_grid {
-	// 	for y in 0..args.cell_grid {
-	// 		world.img[(
-	// 			x * WIDTH / args.cell_grid + 8,
-	// 			y * HEIGHT / args.cell_grid + 8,
-	// 		)] = ActCPMCell((x * args.cell_grid + y + 1) as u8, 80, false);
-	// 	}
-	// }
-	world.img[(WIDTH / 2, HEIGHT / 2)] = ActCPMCell(1, 80, false);
+	for x in 0..args.obstacle_grid {
+		for y in 0..args.obstacle_grid {
+			world.img[(
+				x * WIDTH / args.obstacle_grid,
+				y * HEIGHT / args.obstacle_grid,
+			)] = ActCPMCell((x * args.obstacle_grid + y + 1) as u8, 80, true);
+		}
+	}
+	for x in 0..args.cell_grid {
+		for y in 0..args.cell_grid {
+			world.img[(
+				x * WIDTH / args.cell_grid + 8,
+				y * HEIGHT / args.cell_grid + 8,
+			)] = ActCPMCell((x * args.cell_grid + y + 1) as u8, 80, false);
+		}
+	}
 	world
 }
 
