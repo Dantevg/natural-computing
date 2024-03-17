@@ -1,3 +1,7 @@
+use core::cmp::Ordering;
+
+use euclid::default::Vector2D;
+
 use crate::{boid::Boid, Params};
 
 pub const COHESION_RADIUS: f32 = 50.0;
@@ -53,11 +57,31 @@ impl World {
 	/// Returns the order parameter, which is the average normalised velocity
 	/// of the [`Boid`]s in this [`World`].
 	pub fn order(&self) -> f32 {
-		todo!()
+		self.boids
+			.iter()
+			.map(|boid| boid.dir())
+			.sum::<Vector2D<f32>>()
+			.length() / self.boids.len() as f32
 	}
 
 	/// Returns for each [`Boid`] the distance to its nearest neighbour.
 	pub fn nearest_neighbour_distances(&self) -> Box<[f32]> {
-		todo!()
+		self.boids
+			.iter()
+			.map(|boid| {
+				self.boids
+					.iter()
+					.filter(|&other| boid != other)
+					.map(|other| (boid.pos - other.pos).square_length())
+					.min_by(non_partial_cmp)
+					.unwrap_or(0.0)
+			})
+			.collect()
 	}
+}
+
+/// Wraps a [`PartialOrd`] in a non-partial [`Ord`] by considering
+/// non-comparable elements to be equal.
+fn non_partial_cmp<T: PartialOrd>(a: &T, b: &T) -> Ordering {
+	PartialOrd::partial_cmp(a, b).unwrap_or(Ordering::Equal)
 }
