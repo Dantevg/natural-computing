@@ -10,6 +10,8 @@ use cli::{Args, Cli};
 use ui::{handle_window_event, init_ui};
 use winit::event::Event;
 
+use crate::cli::LogType;
+
 fn main() {
 	let args = Args::parse();
 
@@ -24,6 +26,20 @@ fn main() {
 		let mut cli = Cli::new(&args);
 		for _ in 0..iter {
 			world.update(0.01);
+
+			match args.log {
+				Some(LogType::Order) => println!("{}", world.order()),
+				Some(LogType::NNDist) => println!(
+					"{}",
+					world
+						.nearest_neighbour_distances()
+						.iter()
+						.map(f32::to_string)
+						.collect::<Vec<String>>()
+						.join(",")
+				),
+				_ => (),
+			}
 		}
 
 		if args.output.is_some() {

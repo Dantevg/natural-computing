@@ -1,6 +1,37 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{builder::PossibleValue, Parser, ValueEnum};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LogType {
+	Order,
+	NNDist,
+}
+
+impl ValueEnum for LogType {
+	fn value_variants<'a>() -> &'a [Self] {
+		&[LogType::Order, LogType::NNDist]
+	}
+
+	fn to_possible_value(&self) -> Option<PossibleValue> {
+		match self {
+			LogType::Order => Some(PossibleValue::new("order")),
+			LogType::NNDist => Some(PossibleValue::new("nndist")),
+		}
+	}
+}
+
+// impl FromStr for LogType {
+// 	type Err = ();
+
+// 	fn from_str(s: &str) -> Result<Self, Self::Err> {
+// 		match s.to_ascii_lowercase().as_str() {
+// 			"order" => Ok(Self::Order),
+// 			"nndist" => Ok(Self::NNDist),
+// 			_ => Err(()),
+// 		}
+// 	}
+// }
 
 #[derive(Parser)]
 #[command(
@@ -43,6 +74,10 @@ pub struct Args {
 	/// The strength of the separation boid parameter.
 	#[arg(long, default_value_t = 1.0)]
 	pub separation: f32,
+
+	/// What values to log.
+	#[arg(long)]
+	pub log: Option<LogType>,
 
 	/// Log frame times.
 	#[arg(short, long, default_value_t = false)]
