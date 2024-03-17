@@ -54,8 +54,8 @@ impl World {
 			.collect()
 	}
 
-	/// Returns the order parameter, which is the average normalised velocity
-	/// of the [`Boid`]s in this [`World`].
+	/// Returns the order metric, which is the average normalised velocity of
+	/// the [`Boid`]s in this [`World`].
 	pub fn order(&self) -> f32 {
 		self.boids
 			.iter()
@@ -72,11 +72,27 @@ impl World {
 				self.boids
 					.iter()
 					.filter(|&other| boid != other)
-					.map(|other| (boid.pos - other.pos).square_length())
+					.map(|other| self.dist_sq_wrapping(boid, other))
 					.min_by(non_partial_cmp)
 					.unwrap_or(0.0)
 			})
 			.collect()
+	}
+
+	/// Returns the distance between boids `a` and `b` in a wrapping world, such
+	/// that two boids at opposite edges are regarded as close together.
+	fn dist_sq_wrapping(&self, a: &Boid, b: &Boid) -> f32 {
+		let mut dx = (b.pos.x - a.pos.x).abs();
+		let mut dy = (b.pos.y - a.pos.y).abs();
+
+		if dx > self.width as f32 / 2.0 {
+			dx = self.width as f32 - dx
+		};
+		if dy > self.height as f32 / 2.0 {
+			dy = self.height as f32 - dy
+		};
+
+		dx * dx + dy * dy
 	}
 }
 
