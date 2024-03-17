@@ -62,11 +62,12 @@ impl Boid {
 		);
 		self.angle = dir.angle_from_x_axis();
 
-		self.pos += dir * SPEED * dt;
+		self.pos += self.dir() * SPEED * dt;
 
-		self.pos = self
-			.pos
-			.min(Point2D::new(world.width as f32, world.height as f32))
+		self.pos = Point2D::new(
+			self.pos.x.rem_euclid(world.width as f32),
+			self.pos.y.rem_euclid(world.height as f32),
+		);
 	}
 
 	/// Returns the alignment vector (the average angle) of this boid's

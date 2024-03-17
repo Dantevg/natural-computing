@@ -14,7 +14,14 @@ use cellular_potts_models::{
 };
 
 #[derive(Clone, Copy, Default, Eq, Debug)]
-pub struct ActCPMCell(pub u8, pub u8, pub bool);
+pub struct ActCPMCell(
+	/// Cell ID
+	pub u8,
+	/// Act value
+	pub u8,
+	/// Is obstacle
+	pub bool,
+);
 
 impl ActCPMCell {
 	#[inline(always)]
@@ -120,10 +127,10 @@ impl<const W: usize, const H: usize> CPM<W, H> for ActCPM {
 		src_idx: Coord,
 		dest_idx: Coord,
 	) -> ActCPMCell {
-		self.cell_volumes
-			.update(world, src, dest, src_idx, dest_idx);
-		self.cell_perimeters
-			.update(world, src, dest, src_idx, dest_idx);
+		// self.cell_volumes
+		// 	.update(world, src, dest, src_idx, dest_idx);
+		// self.cell_perimeters
+		// 	.update(world, src, dest, src_idx, dest_idx);
 		if src.is_bg() {
 			src
 		} else {
@@ -152,6 +159,8 @@ impl<const W: usize, const H: usize> CPM<W, H> for ActCPM {
 				cell.1 -= 1;
 			}
 		}
+		self.cell_volumes.recalculate(world);
+		self.cell_perimeters.recalculate(world);
 	}
 }
 

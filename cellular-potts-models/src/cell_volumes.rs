@@ -31,6 +31,16 @@ impl CellVolumes {
 		}
 	}
 
+	pub fn recalculate<const W: usize, const H: usize, C: CPMCell>(
+		&mut self,
+		world: &World<W, H, C>,
+	) {
+		self.0 = vec![0; C::MAX_ID + 1].into_boxed_slice();
+		for cell in world.img.pixels().filter(|c| !c.is_bg()) {
+			self.0[cell.id()] += 1;
+		}
+	}
+
 	#[inline(always)]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]

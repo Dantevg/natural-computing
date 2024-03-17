@@ -62,17 +62,36 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 	where
 		F: FnMut(&Self, C, C, Coord, Coord) -> C,
 	{
-		let mut rng = rand::thread_rng();
-		for _ in 0..W * H {
-			let src_idx = (rng.gen_range(0..W as u32), rng.gen_range(0..H as u32));
-			let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
-			let src = self.img[src_idx];
-			let dest = self.img[dest_idx];
+		// let mut rng = rand::thread_rng();
+		// for _ in 0..W * H {
+		// 	let src_idx = (rng.gen_range(0..W as u32), rng.gen_range(0..H as u32));
+		// 	let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
+		// 	let src = self.img[src_idx];
+		// 	let dest = self.img[dest_idx];
 
-			if src != dest {
-				self.img[dest_idx] = update(self, src, dest, src_idx, dest_idx);
+		// 	if src != dest {
+		// 		self.img[dest_idx] = update(self, src, dest, src_idx, dest_idx);
+		// 	}
+		// }
+
+		let mut rng = rand::thread_rng();
+
+		self.wrap_edges();
+		let mut new_img = self.img.clone();
+
+		for y in 0..H {
+			for x in 0..W {
+				let dest_idx = (x as u32, y as u32);
+				let src_idx = *self.get_neighbours_idx(dest_idx).choose(&mut rng).unwrap();
+				let src = self.img[src_idx];
+				let dest = self.img[dest_idx];
+				if src != dest {
+					new_img[dest_idx] = update(self, src, dest, src_idx, dest_idx);
+				}
 			}
 		}
+
+		self.img = new_img;
 	}
 
 	#[inline(always)]

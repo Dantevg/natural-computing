@@ -29,10 +29,11 @@ impl<const N_BOIDS: usize> World<N_BOIDS> {
 	///
 	/// `dt` is the time in seconds between this update and the previous update.
 	pub fn update(&mut self, dt: f32) {
-		let boids = self.boids.clone();
-		for mut boid in boids {
+		let mut boids = self.boids.clone();
+		for boid in boids.iter_mut() {
 			boid.update(&self, dt);
 		}
+		self.boids = boids;
 	}
 
 	/// Returns all [`Boid`]s that are within a `radius` of the given `boid`.

@@ -49,6 +49,20 @@ impl CellPerimeters {
 		}
 	}
 
+	pub fn recalculate<const W: usize, const H: usize, C: CPMCell>(
+		&mut self,
+		world: &World<W, H, C>,
+	) {
+		self.0 = vec![0; C::MAX_ID + 1].into_boxed_slice();
+		loop9_img(world.img.as_ref(), |_x, _y, top, mid, bot| {
+			let neighbourhood = [
+				top.prev, top.curr, top.next, mid.prev, mid.next, bot.prev, bot.curr, bot.next,
+			];
+			self.0[mid.curr.id()] +=
+				neighbourhood.into_iter().filter(|&n| n != mid.curr).count() as u32;
+		});
+	}
+
 	#[inline(always)]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]

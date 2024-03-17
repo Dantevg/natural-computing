@@ -1,47 +1,68 @@
-use boids::{world::World, Params};
-use pixels::{Pixels, SurfaceTexture};
-use winit::{
-	dpi::PhysicalSize,
-	event::{Event, WindowEvent},
-	event_loop::{ControlFlow, EventLoop},
-	window::WindowBuilder,
-};
+mod cli;
+mod ui;
 
-const WIDTH: u32 = 500;
-const HEIGHT: u32 = 500;
+use std::fs::File;
+
+use boids::{world::World, Params};
+use clap::Parser as _;
+use cli::{Args, Cli};
+
+use ui::{handle_window_event, init_ui};
+use winit::event::Event;
+
+const N_BOIDS: usize = 300;
 
 fn main() {
+	let args = Args::parse();
+
 	let params = Params {
-		alignment_strength: 0.1,
-		cohesion_strength: 0.005,
-		separation_strength: 1.0,
+		alignment_strength: args.alignment,
+		cohesion_strength: args.cohesion,
+		separation_strength: args.separation,
 	};
-	let mut world: World<300> = World::new(WIDTH, HEIGHT, params);
+	let mut world: World<N_BOIDS> = World::new(args.width, args.height, params);
 
-	let event_loop = EventLoop::new().unwrap();
-	event_loop.set_control_flow(ControlFlow::Wait);
+	if let Some(iter) = args.iter {
+		let mut cli = Cli::new(&args);
+		for _ in 0..iter {
+			world.update(0.01);
+		}
 
-	let window = WindowBuilder::new()
-		.with_title("Boids")
-		.with_inner_size(PhysicalSize::new(WIDTH, HEIGHT))
-		.build(&event_loop)
-		.unwrap();
+		if args.output.is_some() {
+			save_image(&world, &mut cli.frame, &args);
+		}
+	} else {
+		let (mut ui, event_loop) = init_ui(&args);
 
-	let window_size = window.inner_size();
-	let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
-	let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture).unwrap();
-
-	event_loop
-		.run(move |event, window_target| {
-			if let Event::WindowEvent { event, .. } = event {
-				match event {
-					WindowEvent::CloseRequested => window_target.exit(),
-					WindowEvent::RedrawRequested => {
-						world.update(0.01);
-					}
-					_ => (),
+		event_loop
+			.run(move |event, window_target| {
+				if let Event::WindowEvent { event, .. } = event {
+					handle_window_event(&mut ui, &mut world, &args, event, window_target);
 				}
-			}
-		})
-		.unwrap();
+			})
+			.unwrap();
+	}
+}
+
+fn save_image(world: &World<N_BOIDS>, frame: &mut [u8], args: &Args) {
+	draw(world, frame, args.width);
+	let path = &args.output.clone().unwrap_or_default();
+	let file = File::create(path).unwrap();
+
+	let mut png_encoder = png::Encoder::new(file, args.width as u32, args.height as u32);
+	png_encoder.set_color(png::ColorType::Rgba);
+	png_encoder.set_depth(png::BitDepth::Eight);
+	let mut png_writer = png_encoder.write_header().unwrap();
+	png_writer.write_image_data(frame).unwrap();
+}
+
+fn draw(world: &World<N_BOIDS>, frame: &mut [u8], width: u32) {
+	for pixel in frame.chunks_exact_mut(4) {
+		pixel.copy_from_slice(&[0x00, 0x00, 0x00, 0xff]);
+	}
+
+	for boid in world.boids.iter() {
+		let idx = (boid.pos.x as usize + boid.pos.y as usize * width as usize) * 4;
+		frame[idx..idx + 4].copy_from_slice(&[0xff, 0xff, 0xff, 0xff]);
+	}
 }
