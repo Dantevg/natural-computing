@@ -257,7 +257,7 @@ dependencies = [
 
 [[package]]
 name = "boids"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "euclid",
  "rand",
@@ -265,7 +265,7 @@ dependencies = [
 
 [[package]]
 name = "boids-ui"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "boids",
  "clap",
