@@ -1,0 +1,19 @@
+name: Rust
+
+on: push
+
+permissions:
+  checks: write
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy
+    - uses: auguwu/clippy-action@1.2.1
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
