@@ -162,15 +162,17 @@ fn save_image<Cpm: CPM<WIDTH, HEIGHT>>(ui: &mut Ui<Cpm>, args: &Args) {
 #[must_use]
 fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 	let world = create_world(args);
+
+	#[rustfmt::skip] // to keep the parameters on separate lines
 	let model = ActCPM::new(
-		args.temp,        // these comments are here to keep the parameters on separate lines
-		args.l_adhesion,  //
-		args.volume,      //
-		args.l_volume,    //
-		args.perimeter,   //
-		args.l_perimeter, //
-		args.max_act,     //
-		args.l_act,       //
+		args.temp,
+		args.l_adhesion,
+		args.volume,
+		args.l_volume,
+		args.perimeter,
+		args.l_perimeter,
+		args.max_act,
+		args.l_act,
 		&world,
 	);
 
@@ -200,8 +202,8 @@ fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 		model,
 		window,
 		pixels,
-		running: false,
-		speed: 1,
+		running: true,
+		speed: 16,
 		iter: 0,
 	};
 

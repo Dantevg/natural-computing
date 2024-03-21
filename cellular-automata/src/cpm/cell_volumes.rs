@@ -43,7 +43,7 @@ impl CellVolumes {
 		}
 	}
 
-	#[inline(always)]
+	#[inline]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]
 	}

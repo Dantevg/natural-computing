@@ -85,6 +85,7 @@ pub struct ActCPM {
 }
 
 impl ActCPM {
+	#[allow(clippy::too_many_arguments)]
 	#[must_use]
 	pub fn new<const W: usize, const H: usize>(
 		temperature: f32,

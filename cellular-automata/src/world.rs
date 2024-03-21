@@ -49,10 +49,11 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 
 		let mut new_img = self.img.clone();
 		loop9_img(self.img.as_ref(), |x, y, top, mid, bot| {
+			#[rustfmt::skip]
 			let neighbourhood = [
-				top.prev, top.curr, top.next, // comments to prevent auto-formatting
-				mid.prev, mid.curr, mid.next, //
-				bot.prev, bot.curr, bot.next, //
+				top.prev, top.curr, top.next,
+				mid.prev, mid.curr, mid.next,
+				bot.prev, bot.curr, bot.next,
 			];
 			new_img[(x, y)] = rule(neighbourhood);
 		});
@@ -66,7 +67,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		let mut rng = rand::thread_rng();
 		for _ in 0..W * H {
 			let src_idx = (rng.gen_range(0..W as u32), rng.gen_range(0..H as u32));
-			let dest_idx = *Self::get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
+			let dest_idx = Self::random_neighbour_idx(src_idx, &mut rng);
 			let src = self.img[src_idx];
 			let dest = self.img[dest_idx];
 
@@ -76,7 +77,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		}
 	}
 
-	#[inline(always)]
+	#[inline]
 	#[must_use]
 	pub fn get_cell(&self, idx: Coord) -> C {
 		self.img[idx]
@@ -112,13 +113,24 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		]
 	}
 
-	#[inline(always)]
+	#[inline]
 	#[must_use]
 	fn get_neighbour_idx(cell_idx: Coord, offset: (i32, i32)) -> Coord {
 		(
-			(cell_idx.0 as i32 + offset.0).rem_euclid(W as i32) as u32,
-			(cell_idx.1 as i32 + offset.1).rem_euclid(H as i32) as u32,
+			cell_idx
+				.0
+				.saturating_add_signed(offset.0)
+				.rem_euclid(W as u32),
+			cell_idx
+				.1
+				.saturating_add_signed(offset.1)
+				.rem_euclid(H as u32),
 		)
+	}
+
+	/// Chooses a random coordinate neighbouring the cell at `cell_idx`.
+	fn random_neighbour_idx<R: Rng>(cell_idx: Coord, rng: &mut R) -> Coord {
+		Self::get_neighbours_idx(cell_idx)[rng.gen_range(0..8)]
 	}
 
 	/// Wraps the edges of this [`World`] in such a way that this:

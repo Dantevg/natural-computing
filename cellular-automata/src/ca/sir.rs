@@ -1,4 +1,4 @@
-use crate::{ca::Automaton, Cell};
+use crate::{ca::Automaton, count_neighbours, Cell};
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub enum State {
@@ -37,10 +37,8 @@ impl<const W: usize, const H: usize> Automaton<W, H> for Sir {
 		let cell = neighbourhood[4];
 		match cell {
 			State::Susceptible => {
-				let n_inf_neighbours = neighbourhood
-					.into_iter()
-					.filter(|&cell| cell == State::Infected)
-					.count() as u8 - cell as u8;
+				let n_inf_neighbours =
+					count_neighbours(neighbourhood, |cell| cell == State::Infected);
 				if rand::random::<f32>() < f32::from(n_inf_neighbours) * 0.1 {
 					State::Infected
 				} else {

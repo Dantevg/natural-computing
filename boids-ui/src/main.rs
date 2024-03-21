@@ -73,6 +73,7 @@ fn draw(world: &World, frame: &mut [u8], width: u32) {
 	}
 
 	for boid in world.boids.iter() {
+		#[allow(clippy::cast_sign_loss)]
 		let idx = (boid.pos.x as usize + boid.pos.y as usize * width as usize) * 4;
 		frame[idx..idx + 4].copy_from_slice(&[0xff, 0xff, 0xff, 0xff]);
 	}

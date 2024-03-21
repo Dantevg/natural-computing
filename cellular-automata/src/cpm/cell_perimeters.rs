@@ -1,4 +1,5 @@
 use crate::{
+	count_neighbours,
 	cpm::CPMCell,
 	world::{Coord, World},
 };
@@ -15,11 +16,14 @@ impl CellPerimeters {
 		// TODO: wrap borders
 
 		loop9_img(world.img.as_ref(), |_x, _y, top, mid, bot| {
+			#[rustfmt::skip]
 			let neighbourhood = [
-				top.prev, top.curr, top.next, mid.prev, mid.next, bot.prev, bot.curr, bot.next,
+				top.prev, top.curr, top.next,
+				mid.prev, mid.curr, mid.next,
+				bot.prev, bot.curr, bot.next,
 			];
 			perimeters[mid.curr.id()] +=
-				neighbourhood.into_iter().filter(|&n| n != mid.curr).count() as u32;
+				u32::from(count_neighbours(neighbourhood, |n| n != mid.curr));
 		});
 
 		Self(perimeters)
@@ -58,15 +62,17 @@ impl CellPerimeters {
 	) {
 		self.0 = vec![0; C::MAX_ID + 1].into_boxed_slice();
 		loop9_img(world.img.as_ref(), |_x, _y, top, mid, bot| {
+			#[rustfmt::skip]
 			let neighbourhood = [
-				top.prev, top.curr, top.next, mid.prev, mid.next, bot.prev, bot.curr, bot.next,
+				top.prev, top.curr, top.next,
+				mid.prev, mid.curr, mid.next,
+				bot.prev, bot.curr, bot.next,
 			];
-			self.0[mid.curr.id()] +=
-				neighbourhood.into_iter().filter(|&n| n != mid.curr).count() as u32;
+			self.0[mid.curr.id()] += u32::from(count_neighbours(neighbourhood, |n| n != mid.curr));
 		});
 	}
 
-	#[inline(always)]
+	#[inline]
 	pub fn get<C: CPMCell>(&self, cell: C) -> u32 {
 		self.0[cell.id()]
 	}

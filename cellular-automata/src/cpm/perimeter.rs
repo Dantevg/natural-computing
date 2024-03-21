@@ -36,10 +36,11 @@ where
 
 		let src_perim = self.perimeter(world, src_idx, src);
 		let dest_perim = self.perimeter(world, dest_idx, dest);
-		let src_gain = self.get_perimeter_penalty(src, (src_perim as i32 + src_perim_delta) as u32)
+		let src_gain = self
+			.get_perimeter_penalty(src, src_perim.saturating_add_signed(src_perim_delta))
 			- self.get_perimeter_penalty(src, src_perim);
 		let dest_loss = self
-			.get_perimeter_penalty(dest, (dest_perim as i32 + dest_perim_delta) as u32)
+			.get_perimeter_penalty(dest, dest_perim.saturating_add_signed(dest_perim_delta))
 			- self.get_perimeter_penalty(dest, dest_perim);
 		src_gain + dest_loss
 	}

@@ -19,3 +19,20 @@ impl Cell for bool {
 		}
 	}
 }
+
+/// Returns the number of neighbours where `filter` returns `true`. Does not
+/// count the middle cell.
+fn count_neighbours<C: Copy, F>(neighbourhood: [C; 9], filter: F) -> u8
+where
+	F: Fn(C) -> bool,
+{
+	u8::from(filter(neighbourhood[0]))
+		+ u8::from(filter(neighbourhood[1]))
+		+ u8::from(filter(neighbourhood[2]))
+		+ u8::from(filter(neighbourhood[3]))
+		// do not include self, only count neighbours
+		+ u8::from(filter(neighbourhood[5]))
+		+ u8::from(filter(neighbourhood[6]))
+		+ u8::from(filter(neighbourhood[7]))
+		+ u8::from(filter(neighbourhood[8]))
+}
