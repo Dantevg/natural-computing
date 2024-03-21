@@ -3,7 +3,7 @@ use crate::{
 	world::{Coord, World},
 };
 
-#[allow(clippy::module_name_repetitions)]
+// #[allow(clippy::module_name_repetitions)]
 pub trait ActCell {
 	#[must_use]
 	fn get_activity(&self) -> u8;
