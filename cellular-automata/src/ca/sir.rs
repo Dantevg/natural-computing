@@ -1,4 +1,4 @@
-use crate::{Automaton, Cell};
+use crate::{ca::Automaton, Cell};
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub enum SirState {

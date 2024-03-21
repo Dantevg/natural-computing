@@ -1,7 +1,9 @@
-use cellular_automata::world::{Coord, World};
-use loop9::loop9_img;
+use crate::{
+	cpm::CPMCell,
+	world::{Coord, World},
+};
 
-use crate::CPMCell;
+use loop9::loop9_img;
 
 pub struct CellPerimeters(Box<[u32]>);
 

@@ -12,8 +12,7 @@ use std::{
 
 use act_cpm::{ActCPM, ActCPMCell};
 
-use cellular_automata::world::World;
-use cellular_potts_models::CPM;
+use cellular_automata::{cpm::CPM, world::World};
 
 use clap::Parser as _;
 use cli::Args;

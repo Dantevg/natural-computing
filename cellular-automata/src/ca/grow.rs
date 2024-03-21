@@ -1,4 +1,4 @@
-use crate::Automaton;
+use crate::ca::Automaton;
 
 #[derive(Default)]
 pub struct Grow;

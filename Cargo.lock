@@ -23,7 +23,6 @@ name = "act-cpm-ui"
 version = "1.0.0"
 dependencies = [
  "cellular-automata",
- "cellular-potts-models",
  "clap",
  "pixels",
  "png",
@@ -332,15 +331,6 @@ name = "cellular-automata"
 version = "1.0.0"
 dependencies = [
  "imgref",
- "loop9",
- "rand",
-]
-
-[[package]]
-name = "cellular-potts-models"
-version = "1.0.0"
-dependencies = [
- "cellular-automata",
  "loop9",
  "rand",
 ]

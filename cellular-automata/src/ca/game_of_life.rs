@@ -1,14 +1,4 @@
-use crate::{Automaton, Cell};
-
-impl Cell for bool {
-	fn colour(&self) -> [u8; 4] {
-		if *self {
-			[0xff, 0xff, 0xff, 0xff]
-		} else {
-			[0x00, 0x00, 0x00, 0xff]
-		}
-	}
-}
+use crate::ca::Automaton;
 
 #[derive(Default)]
 pub struct GameOfLife;

@@ -1,16 +1,15 @@
 use cellular_automata::{
+	cpm::{
+		act::{Act, ActCell},
+		adhesion::Adhesion,
+		cell_perimeters::CellPerimeters,
+		cell_volumes::CellVolumes,
+		perimeter::Perimeter,
+		volume::Volume,
+		CPMCell, CPM,
+	},
 	world::{Coord, World},
 	Cell,
-};
-
-use cellular_potts_models::{
-	act::{Act, ActCell},
-	adhesion::Adhesion,
-	cell_perimeters::CellPerimeters,
-	cell_volumes::CellVolumes,
-	perimeter::Perimeter,
-	volume::Volume,
-	CPMCell, CPM,
 };
 
 #[derive(Clone, Copy, Default, Eq, Debug)]

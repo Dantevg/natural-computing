@@ -1,6 +1,7 @@
-use cellular_automata::world::{Coord, World};
-
-use crate::CPMCell;
+use crate::{
+	cpm::CPMCell,
+	world::{Coord, World},
+};
 
 pub struct CellVolumes(Box<[u32]>);
 

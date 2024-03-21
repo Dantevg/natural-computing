@@ -1,6 +1,7 @@
-use cellular_automata::world::{Coord, World};
-
-use crate::CPM;
+use crate::{
+	cpm::CPM,
+	world::{Coord, World},
+};
 
 pub trait Volume<const W: usize, const H: usize>
 where

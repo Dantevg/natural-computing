@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 cellular-automata = { path = "../cellular-automata" }
-cellular-potts-models = { path = "../cellular-potts-models" }
 pixels = "0.13"
 winit = { version = "0.29", features = ["rwh_05"] }
 rand = "0.8.5"

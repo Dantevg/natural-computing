@@ -5,7 +5,7 @@ pub mod cell_volumes;
 pub mod perimeter;
 pub mod volume;
 
-use cellular_automata::{
+use crate::{
 	world::{Coord, World},
 	Cell,
 };
