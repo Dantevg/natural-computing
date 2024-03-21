@@ -4,6 +4,7 @@ use crate::{
 };
 
 pub trait ActCell {
+	#[must_use]
 	fn get_activity(&self) -> u8;
 }
 
@@ -12,9 +13,11 @@ where
 	Self: CPM<W, H>,
 	Self::C: ActCell,
 {
+	#[must_use]
 	fn get_act_penalty(&self, activity_delta: f32) -> f32;
 
 	/// Returns the geometric mean of the activity in the neighbourhood of a cell.
+	#[must_use]
 	fn gm_act(&self, world: &World<W, H, Self::C>, idx: Coord) -> f32 {
 		let cell = world.get_cell(idx);
 		world
@@ -22,7 +25,7 @@ where
 			.iter()
 			.filter_map(|&neigh| {
 				if neigh == cell {
-					Some(neigh.get_activity() as f32)
+					Some(f32::from(neigh.get_activity()))
 				} else {
 					None
 				}
@@ -32,6 +35,7 @@ where
 
 	/// Returns the delta act energy for copying the cell at `src_idx` into
 	/// `dest_idx`.
+	#[must_use]
 	fn act_delta(
 		&self,
 		world: &World<W, H, Self::C>,
@@ -45,6 +49,7 @@ where
 }
 
 trait GeometricMean {
+	#[must_use]
 	fn geometric_mean(self) -> f32;
 }
 

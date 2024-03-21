@@ -19,6 +19,7 @@ impl<const W: usize, const H: usize, C: Cell + Default> Default for World<W, H, 
 }
 
 impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
+	#[must_use]
 	pub fn from_fn<F>(function: F) -> Self
 	where
 		F: FnMut(usize) -> C,
@@ -65,7 +66,7 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 		let mut rng = rand::thread_rng();
 		for _ in 0..W * H {
 			let src_idx = (rng.gen_range(0..W as u32), rng.gen_range(0..H as u32));
-			let dest_idx = *self.get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
+			let dest_idx = *Self::get_neighbours_idx(src_idx).choose(&mut rng).unwrap();
 			let src = self.img[src_idx];
 			let dest = self.img[dest_idx];
 
@@ -76,40 +77,44 @@ impl<const W: usize, const H: usize, C: Cell> World<W, H, C> {
 	}
 
 	#[inline(always)]
+	#[must_use]
 	pub fn get_cell(&self, idx: Coord) -> C {
 		self.img[idx]
 	}
 
+	#[must_use]
 	pub fn get_neighbours(&self, cell_idx: Coord) -> [C; 8] {
 		[
-			self.img[self.get_neighbour_idx(cell_idx, (-1, -1))],
-			self.img[self.get_neighbour_idx(cell_idx, (0, -1))],
-			self.img[self.get_neighbour_idx(cell_idx, (1, -1))],
-			self.img[self.get_neighbour_idx(cell_idx, (-1, 0))],
+			self.img[Self::get_neighbour_idx(cell_idx, (-1, -1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (0, -1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (1, -1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (-1, 0))],
 			/* ignore self */
-			self.img[self.get_neighbour_idx(cell_idx, (1, 0))],
-			self.img[self.get_neighbour_idx(cell_idx, (-1, 1))],
-			self.img[self.get_neighbour_idx(cell_idx, (0, 1))],
-			self.img[self.get_neighbour_idx(cell_idx, (1, 1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (1, 0))],
+			self.img[Self::get_neighbour_idx(cell_idx, (-1, 1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (0, 1))],
+			self.img[Self::get_neighbour_idx(cell_idx, (1, 1))],
 		]
 	}
 
-	fn get_neighbours_idx(&self, cell_idx: Coord) -> [Coord; 8] {
+	#[must_use]
+	fn get_neighbours_idx(cell_idx: Coord) -> [Coord; 8] {
 		[
-			self.get_neighbour_idx(cell_idx, (-1, -1)),
-			self.get_neighbour_idx(cell_idx, (0, -1)),
-			self.get_neighbour_idx(cell_idx, (1, -1)),
-			self.get_neighbour_idx(cell_idx, (-1, 0)),
+			Self::get_neighbour_idx(cell_idx, (-1, -1)),
+			Self::get_neighbour_idx(cell_idx, (0, -1)),
+			Self::get_neighbour_idx(cell_idx, (1, -1)),
+			Self::get_neighbour_idx(cell_idx, (-1, 0)),
 			/* ignore self */
-			self.get_neighbour_idx(cell_idx, (1, 0)),
-			self.get_neighbour_idx(cell_idx, (-1, 1)),
-			self.get_neighbour_idx(cell_idx, (0, 1)),
-			self.get_neighbour_idx(cell_idx, (1, 1)),
+			Self::get_neighbour_idx(cell_idx, (1, 0)),
+			Self::get_neighbour_idx(cell_idx, (-1, 1)),
+			Self::get_neighbour_idx(cell_idx, (0, 1)),
+			Self::get_neighbour_idx(cell_idx, (1, 1)),
 		]
 	}
 
 	#[inline(always)]
-	fn get_neighbour_idx(&self, cell_idx: Coord, offset: (i32, i32)) -> Coord {
+	#[must_use]
+	fn get_neighbour_idx(cell_idx: Coord, offset: (i32, i32)) -> Coord {
 		(
 			(cell_idx.0 as i32 + offset.0).rem_euclid(W as i32) as u32,
 			(cell_idx.1 as i32 + offset.1).rem_euclid(H as i32) as u32,

@@ -18,12 +18,14 @@ pub struct Boid {
 
 impl Boid {
 	/// Creates a new [`Boid`] at the given position and `angle`.
+	#[must_use]
 	pub fn new(pos: Point2D<f32>, angle: Angle<f32>) -> Self {
 		Self { pos, angle }
 	}
 
 	/// Creates a new [`Boid`] at a random position within the given `width` and
 	/// `height`, and at a random angle.
+	#[must_use]
 	pub fn random(width: u32, height: u32) -> Self {
 		let mut rng = rand::thread_rng();
 		Self {
@@ -36,6 +38,7 @@ impl Boid {
 	}
 
 	/// Returns the direction vector of this [`Boid`].
+	#[must_use]
 	pub fn dir(&self) -> Vector2D<f32> {
 		Vector2D::from_angle_and_length(self.angle, 1.0)
 	}
@@ -44,8 +47,8 @@ impl Boid {
 	///
 	/// `dt` is the time in seconds between this update and the previous update.
 	pub fn update(&mut self, world: &World, dt: f32) {
-		let neighbours = world.neighbours(&self, COHESION_RADIUS);
-		let too_close_neighbours = world.neighbours(&self, SEPARATION_RADIUS);
+		let neighbours = world.neighbours(self, COHESION_RADIUS);
+		let too_close_neighbours = world.neighbours(self, SEPARATION_RADIUS);
 
 		let alignment = self.alignment(&neighbours);
 		let cohesion = self.cohesion(&neighbours);
@@ -72,7 +75,9 @@ impl Boid {
 
 	/// Returns the alignment vector (the average angle) of this boid's
 	/// neighbours.
-	fn alignment(&self, neighbours: &Vec<&Boid>) -> Vector2D<f32> {
+	#[must_use]
+	#[allow(clippy::unused_self)]
+	fn alignment(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
 		neighbours
 			.iter()
 			.map(|boid| boid.dir())
@@ -82,7 +87,8 @@ impl Boid {
 
 	/// Returns the cohesion vector (pointing to the centre-point) of this boid's
 	/// neighbours.
-	fn cohesion(&self, neighbours: &Vec<&Boid>) -> Vector2D<f32> {
+	#[must_use]
+	fn cohesion(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
 		let avg_pos = neighbours
 			.iter()
 			.map(|boid| boid.pos.to_vector())
@@ -93,7 +99,8 @@ impl Boid {
 
 	/// Returns the separation vector (pointing away from the centre-point) of
 	/// this boid's nearer neighbourhood.
-	fn separation(&self, neighbours: &Vec<&Boid>) -> Vector2D<f32> {
+	#[must_use]
+	fn separation(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
 		neighbours
 			.iter()
 			.filter(|&boid| *boid != self)
@@ -105,6 +112,7 @@ impl Boid {
 	}
 }
 
+#[must_use]
 fn lerp_vecs(vecs: Vec<Vector2D<f32>>, ts: Vec<f32>) -> Vector2D<f32> {
 	debug_assert_eq!(vecs.len(), ts.len());
 	vecs.into_iter().zip(ts).map(|(vec, t)| vec * t).sum()

@@ -6,6 +6,7 @@ use crate::{
 pub struct CellVolumes(Box<[u32]>);
 
 impl CellVolumes {
+	#[must_use]
 	pub fn from_world<const W: usize, const H: usize, C: CPMCell>(world: &World<W, H, C>) -> Self {
 		let mut volumes = vec![0; C::MAX_ID + 1].into_boxed_slice();
 
@@ -25,10 +26,10 @@ impl CellVolumes {
 		_dest_idx: Coord,
 	) {
 		if !src.is_bg() {
-			self.0[src.id()] += 1
+			self.0[src.id()] += 1;
 		}
 		if !dest.is_bg() {
-			self.0[dest.id()] -= 1
+			self.0[dest.id()] -= 1;
 		}
 	}
 

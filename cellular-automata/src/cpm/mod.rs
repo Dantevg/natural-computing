@@ -16,12 +16,17 @@ where
 {
 	const MAX_ID: usize;
 
+	#[must_use]
 	fn is_bg(&self) -> bool;
+
+	#[must_use]
 	fn id(&self) -> usize;
 }
 
 pub trait CPM<const W: usize, const H: usize> {
 	type C: CPMCell;
+
+	#[must_use]
 	fn hamiltonian(
 		&self,
 		world: &World<W, H, Self::C>,
@@ -31,8 +36,10 @@ pub trait CPM<const W: usize, const H: usize> {
 		dest_idx: Coord,
 	) -> f32;
 
+	#[must_use]
 	fn get_temperature(&self) -> f32;
 
+	#[must_use]
 	fn update(
 		&mut self,
 		_world: &World<W, H, Self::C>,

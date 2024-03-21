@@ -1,19 +1,19 @@
 use crate::{ca::Automaton, Cell};
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
-pub enum SirState {
+pub enum State {
 	#[default]
 	Susceptible,
 	Infected,
 	Resistant,
 }
 
-impl Cell for SirState {
+impl Cell for State {
 	fn colour(&self) -> [u8; 4] {
 		match self {
-			SirState::Susceptible => [0xff, 0xff, 0xff, 0xff],
-			SirState::Infected => [0x00, 0x00, 0x00, 0xff],
-			SirState::Resistant => [0x88, 0x88, 0x88, 0xff],
+			State::Susceptible => [0xff, 0xff, 0xff, 0xff],
+			State::Infected => [0x00, 0x00, 0x00, 0xff],
+			State::Resistant => [0x88, 0x88, 0x88, 0xff],
 		}
 	}
 }
@@ -24,36 +24,37 @@ pub struct Sir {
 }
 
 impl Sir {
+	#[must_use]
 	pub fn new(p_cure: f32) -> Self {
 		Self { p_cure }
 	}
 }
 
 impl<const W: usize, const H: usize> Automaton<W, H> for Sir {
-	type C = SirState;
+	type C = State;
 
-	fn rule(&self, neighbourhood: [SirState; 9]) -> SirState {
+	fn rule(&self, neighbourhood: [State; 9]) -> State {
 		let cell = neighbourhood[4];
 		match cell {
-			SirState::Susceptible => {
+			State::Susceptible => {
 				let n_inf_neighbours = neighbourhood
 					.into_iter()
-					.filter(|&cell| cell == SirState::Infected)
+					.filter(|&cell| cell == State::Infected)
 					.count() as u8 - cell as u8;
-				if rand::random::<f32>() < n_inf_neighbours as f32 * 0.1 {
-					SirState::Infected
+				if rand::random::<f32>() < f32::from(n_inf_neighbours) * 0.1 {
+					State::Infected
 				} else {
-					SirState::Susceptible
+					State::Susceptible
 				}
 			}
-			SirState::Infected => {
+			State::Infected => {
 				if rand::random::<f32>() < self.p_cure {
-					SirState::Resistant
+					State::Resistant
 				} else {
-					SirState::Infected
+					State::Infected
 				}
 			}
-			SirState::Resistant => SirState::Resistant,
+			State::Resistant => State::Resistant,
 		}
 	}
 }

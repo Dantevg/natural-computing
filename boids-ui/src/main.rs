@@ -7,10 +7,7 @@ use boids::{world::World, Params};
 use clap::Parser as _;
 use cli::{Args, Cli};
 
-use ui::{handle_window_event, init_ui};
 use winit::event::Event;
-
-use crate::cli::LogType;
 
 fn main() {
 	let args = Args::parse();
@@ -28,8 +25,8 @@ fn main() {
 			world.update(0.01);
 
 			match args.log {
-				Some(LogType::Order) => println!("{}", world.order()),
-				Some(LogType::NNDist) => println!(
+				Some(cli::LogType::Order) => println!("{}", world.order()),
+				Some(cli::LogType::NNDist) => println!(
 					"{}",
 					world
 						.nearest_neighbour_distances()
@@ -46,12 +43,12 @@ fn main() {
 			save_image(&world, &mut cli.frame, &args);
 		}
 	} else {
-		let (mut ui, event_loop) = init_ui(&args);
+		let (mut ui, event_loop) = ui::init(&args);
 
 		event_loop
 			.run(move |event, window_target| {
 				if let Event::WindowEvent { event, .. } = event {
-					handle_window_event(&mut ui, &mut world, &args, event, window_target);
+					ui::handle_window_event(&mut ui, &mut world, &args, event, window_target);
 				}
 			})
 			.unwrap();
@@ -63,7 +60,7 @@ fn save_image(world: &World, frame: &mut [u8], args: &Args) {
 	let path = &args.output.clone().unwrap_or_default();
 	let file = File::create(path).unwrap();
 
-	let mut png_encoder = png::Encoder::new(file, args.width as u32, args.height as u32);
+	let mut png_encoder = png::Encoder::new(file, args.width, args.height);
 	png_encoder.set_color(png::ColorType::Rgba);
 	png_encoder.set_depth(png::BitDepth::Eight);
 	let mut png_writer = png_encoder.write_header().unwrap();

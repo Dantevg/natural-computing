@@ -41,7 +41,7 @@ pub fn handle_window_event(
 					);
 				}
 			}
-			draw(&world, ui.pixels.frame_mut(), args.width);
+			draw(world, ui.pixels.frame_mut(), args.width);
 			ui.pixels.render().unwrap();
 			ui.window.request_redraw();
 		}
@@ -86,7 +86,8 @@ pub fn handle_window_event(
 	}
 }
 
-pub fn init_ui(args: &Args) -> (Ui, EventLoop<()>) {
+#[must_use]
+pub fn init(args: &Args) -> (Ui, EventLoop<()>) {
 	let event_loop = EventLoop::new().unwrap();
 	event_loop.set_control_flow(ControlFlow::Wait);
 

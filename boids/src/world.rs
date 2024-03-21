@@ -19,6 +19,7 @@ pub struct World {
 impl World {
 	/// Creates a [`World`] with the given `width` and `height`, filled with
 	/// randomly initialised [`Boid`]s.
+	#[must_use]
 	pub fn new(width: u32, height: u32, n_boids: u32, params: Params) -> Self {
 		Self {
 			width,
@@ -38,7 +39,7 @@ impl World {
 	pub fn update(&mut self, dt: f32) {
 		let mut boids = self.boids.clone();
 		for boid in boids.iter_mut() {
-			boid.update(&self, dt);
+			boid.update(self, dt);
 		}
 		self.boids = boids;
 	}
@@ -47,6 +48,7 @@ impl World {
 	/// This includes the `boid` itself.
 	///
 	/// TODO: optimize using a K-d tree for example.
+	#[must_use]
 	pub fn neighbours(&self, boid: &Boid, radius: f32) -> Vec<&Boid> {
 		self.boids
 			.iter()
@@ -56,15 +58,17 @@ impl World {
 
 	/// Returns the order metric, which is the average normalised velocity of
 	/// the [`Boid`]s in this [`World`].
+	#[must_use]
 	pub fn order(&self) -> f32 {
 		self.boids
 			.iter()
-			.map(|boid| boid.dir())
+			.map(Boid::dir)
 			.sum::<Vector2D<f32>>()
 			.length() / self.boids.len() as f32
 	}
 
 	/// Returns for each [`Boid`] the distance to its nearest neighbour.
+	#[must_use]
 	pub fn nearest_neighbour_distances(&self) -> Box<[f32]> {
 		self.boids
 			.iter()
@@ -81,16 +85,17 @@ impl World {
 
 	/// Returns the distance between boids `a` and `b` in a wrapping world, such
 	/// that two boids at opposite edges are regarded as close together.
+	#[must_use]
 	fn dist_sq_wrapping(&self, a: &Boid, b: &Boid) -> f32 {
 		let mut dx = (b.pos.x - a.pos.x).abs();
 		let mut dy = (b.pos.y - a.pos.y).abs();
 
 		if dx > self.width as f32 / 2.0 {
-			dx = self.width as f32 - dx
-		};
+			dx = self.width as f32 - dx;
+		}
 		if dy > self.height as f32 / 2.0 {
-			dy = self.height as f32 - dy
-		};
+			dy = self.height as f32 - dy;
+		}
 
 		dx * dx + dy * dy
 	}

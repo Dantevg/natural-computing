@@ -8,6 +8,7 @@ use loop9::loop9_img;
 pub struct CellPerimeters(Box<[u32]>);
 
 impl CellPerimeters {
+	#[must_use]
 	pub fn from_world<const W: usize, const H: usize, C: CPMCell>(world: &World<W, H, C>) -> Self {
 		let mut perimeters = vec![0; C::MAX_ID + 1].into_boxed_slice();
 
@@ -36,11 +37,11 @@ impl CellPerimeters {
 		let mut n_new = 0;
 		let mut n_old = 0;
 		for neighbour in world.get_neighbours(dest_idx) {
-			n_new += (neighbour != src) as u32;
-			n_old += (neighbour != dest) as u32;
+			n_new += u32::from(neighbour != src);
+			n_old += u32::from(neighbour != dest);
 			if !neighbour.is_bg() {
-				self.0[neighbour.id()] += (neighbour == dest) as u32;
-				self.0[neighbour.id()] -= (neighbour == src) as u32;
+				self.0[neighbour.id()] += u32::from(neighbour == dest);
+				self.0[neighbour.id()] -= u32::from(neighbour == src);
 			}
 		}
 		if !dest.is_bg() {

@@ -24,7 +24,8 @@ pub struct ActCPMCell(
 
 impl ActCPMCell {
 	#[inline(always)]
-	pub fn is_obstacle(&self) -> bool {
+	#[must_use]
+	pub fn is_obstacle(self) -> bool {
 		self.2
 	}
 }
@@ -59,7 +60,7 @@ impl CPMCell for ActCPMCell {
 
 	#[inline(always)]
 	fn id(&self) -> usize {
-		self.0 as usize + (self.2 as usize * 256)
+		self.0 as usize + (usize::from(self.2) * 256)
 	}
 }
 
@@ -84,6 +85,7 @@ pub struct ActCPM {
 }
 
 impl ActCPM {
+	#[must_use]
 	pub fn new<const W: usize, const H: usize>(
 		temperature: f32,
 		adhesion_penalty: f32,
@@ -212,7 +214,7 @@ impl<const W: usize, const H: usize> Perimeter<W, H> for ActCPM {
 impl<const W: usize, const H: usize> Act<W, H> for ActCPM {
 	fn get_act_penalty(&self, activity_delta: f32) -> f32 {
 		if self.max_act > 0 {
-			-(self.lambda_act / self.max_act as f32) * activity_delta
+			-(self.lambda_act / f32::from(self.max_act)) * activity_delta
 		} else {
 			f32::INFINITY
 		}

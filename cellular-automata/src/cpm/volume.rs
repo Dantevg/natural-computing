@@ -7,14 +7,17 @@ pub trait Volume<const W: usize, const H: usize>
 where
 	Self: CPM<W, H>,
 {
+	#[must_use]
 	fn get_volume_penalty(&self, cell: Self::C, volume: u32) -> f32;
 
 	/// Returns the volume in the number of grid cells for a single cell, if
 	/// that grid cell were to have the given `state`.
+	#[must_use]
 	fn volume(&self, world: &World<W, H, Self::C>, idx: Coord, state: Self::C) -> u32;
 
 	/// Returns the delta volume energy for copying the cell at `src_idx` into
 	/// `dest_idx`.
+	#[must_use]
 	fn volume_delta(
 		&self,
 		world: &World<W, H, Self::C>,

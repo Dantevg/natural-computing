@@ -51,7 +51,7 @@ fn main() {
 	event_loop
 		.run(move |event, window_target| {
 			if let Event::WindowEvent { event, .. } = event {
-				handle_window_event(&mut ui, &args, event, window_target, &mut modifiers)
+				handle_window_event(&mut ui, &args, event, window_target, &mut modifiers);
 			}
 		})
 		.unwrap();
@@ -93,16 +93,16 @@ fn handle_window_event<Cpm: CPM<WIDTH, HEIGHT>>(
 					println!(
 						"update:{:3}ms ({:2}ms/i) total:{:3}ms",
 						update_time.duration_since(start_time).as_millis(),
-						update_time.duration_since(start_time).as_millis() / ui.speed as u128,
+						update_time.duration_since(start_time).as_millis() / u128::from(ui.speed),
 						draw_time.duration_since(start_time).as_millis()
-					)
+					);
 				} else {
 					print!(
 						"\rupdate:{:3}ms ({:2}ms/i) i:{:6}",
 						update_time.duration_since(start_time).as_millis(),
-						update_time.duration_since(start_time).as_millis() / ui.speed as u128,
+						update_time.duration_since(start_time).as_millis() / u128::from(ui.speed),
 						ui.iter,
-					)
+					);
 				}
 			}
 		}
@@ -156,9 +156,10 @@ fn save_image<Cpm: CPM<WIDTH, HEIGHT>>(ui: &mut Ui<Cpm>, args: &Args) {
 		ui.iter,
 	);
 	// Clear current line and put cursor at beginning of line (in case of non-verbose output)
-	println!("\x1b[1K\rSaved image {}.png", ui.iter)
+	println!("\x1b[1K\rSaved image {}.png", ui.iter);
 }
 
+#[must_use]
 fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 	let world = create_world(args);
 	let model = ActCPM::new(
@@ -207,6 +208,7 @@ fn init(args: &Args) -> (Ui<ActCPM>, EventLoop<()>) {
 	(ui, event_loop)
 }
 
+#[must_use]
 fn create_world(args: &Args) -> World<200, 200, ActCPMCell> {
 	let mut world: World<WIDTH, HEIGHT, _> = World::default();
 	for x in 0..args.obstacle_grid {
