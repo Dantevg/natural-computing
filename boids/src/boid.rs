@@ -13,14 +13,14 @@ pub const SPEED: f32 = 100.0;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Boid {
 	pub pos: Point2D<f32>,
-	pub angle: Angle<f32>,
+	pub dir: Vector2D<f32>,
 }
 
 impl Boid {
-	/// Creates a new [`Boid`] at the given position and `angle`.
+	/// Creates a new [`Boid`] at the given position and direction vector.
 	#[must_use]
-	pub fn new(pos: Point2D<f32>, angle: Angle<f32>) -> Self {
-		Self { pos, angle }
+	pub fn new(pos: Point2D<f32>, dir: Vector2D<f32>) -> Self {
+		Self { pos, dir }
 	}
 
 	/// Creates a new [`Boid`] at a random position within the given `width` and
@@ -33,14 +33,8 @@ impl Boid {
 				rng.gen_range(0..width) as f32,
 				rng.gen_range(0..height) as f32,
 			),
-			angle: Angle::radians(rng.gen_range(0.0..PI * 2.0)),
+			dir: Vector2D::from_angle_and_length(Angle::radians(rng.gen_range(0.0..PI * 2.0)), 1.0),
 		}
-	}
-
-	/// Returns the direction vector of this [`Boid`].
-	#[must_use]
-	pub fn dir(&self) -> Vector2D<f32> {
-		Vector2D::from_angle_and_length(self.angle, 1.0)
 	}
 
 	/// Update this [`Boid`]'s position and angle according to boid rules.
@@ -54,19 +48,20 @@ impl Boid {
 		let cohesion = self.cohesion(&neighbours);
 		let separation = self.separation(&too_close_neighbours);
 
-		let dir = lerp_vecs(
-			vec![self.dir(), alignment, cohesion, separation],
+		self.dir = lerp_vecs(
+			vec![self.dir, alignment, cohesion, separation],
 			vec![
 				1.0,
 				world.params.alignment_strength,
 				world.params.cohesion_strength,
 				world.params.separation_strength,
 			],
-		);
-		self.angle = dir.angle_from_x_axis();
+		)
+		.normalize();
 
-		self.pos += self.dir() * SPEED * dt;
+		self.pos += self.dir * SPEED * dt;
 
+		// Wrap around
 		self.pos = Point2D::new(
 			self.pos.x.rem_euclid(world.width as f32),
 			self.pos.y.rem_euclid(world.height as f32),
@@ -80,7 +75,7 @@ impl Boid {
 	fn alignment(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
 		neighbours
 			.iter()
-			.map(|boid| boid.dir())
+			.map(|boid| boid.dir)
 			.sum::<Vector2D<f32>>()
 			/ neighbours.len() as f32
 	}

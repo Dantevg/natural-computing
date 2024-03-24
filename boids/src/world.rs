@@ -11,7 +11,6 @@ pub const SEPARATION_RADIUS: f32 = 20.0;
 pub struct World {
 	pub width: u32,
 	pub height: u32,
-	pub n_boids: u32,
 	pub boids: Box<[Boid]>,
 	pub params: Params,
 }
@@ -24,7 +23,6 @@ impl World {
 		Self {
 			width,
 			height,
-			n_boids,
 			boids: (0..n_boids)
 				.map(|_| Boid::random(width, height))
 				.collect::<Vec<Boid>>()
@@ -62,7 +60,7 @@ impl World {
 	pub fn order(&self) -> f32 {
 		self.boids
 			.iter()
-			.map(Boid::dir)
+			.map(|boid| boid.dir)
 			.sum::<Vector2D<f32>>()
 			.length() / self.boids.len() as f32
 	}
