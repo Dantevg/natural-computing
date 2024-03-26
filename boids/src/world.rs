@@ -1,6 +1,6 @@
 use core::cmp::Ordering;
 
-use euclid::default::Vector2D;
+use euclid::default::{Point2D, Vector2D};
 
 use crate::{boid::Boid, Params};
 
@@ -47,11 +47,8 @@ impl World {
 	///
 	/// TODO: optimize using a K-d tree for example.
 	#[must_use]
-	pub fn neighbours(&self, boid: &Boid, radius: f32) -> Vec<&Boid> {
-		self.boids
-			.iter()
-			.filter(|other| (boid.pos - other.pos).square_length() <= radius * radius)
-			.collect()
+	pub fn neighbours(&self, boid: &Boid, radius: f32) -> Vec<Boid> {
+		filter_neighbours(&self.boids, boid.pos, radius)
 	}
 
 	/// Returns the order metric, which is the average normalised velocity of
@@ -103,4 +100,15 @@ impl World {
 /// non-comparable elements to be equal.
 fn non_partial_cmp<T: PartialOrd>(a: &T, b: &T) -> Ordering {
 	PartialOrd::partial_cmp(a, b).unwrap_or(Ordering::Equal)
+}
+
+/// Returns a vector of boids that are within the given `radius` of the point `at`.
+#[must_use]
+pub fn filter_neighbours(boids: &[Boid], at: Point2D<f32>, radius: f32) -> Vec<Boid> {
+	let sqr_radius = radius * radius;
+	boids
+		.iter()
+		.filter(|other| (at - other.pos).square_length() <= sqr_radius)
+		.copied()
+		.collect()
 }

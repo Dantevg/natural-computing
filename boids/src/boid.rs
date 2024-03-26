@@ -6,7 +6,7 @@ use euclid::{
 };
 use rand::Rng;
 
-use crate::world::{World, COHESION_RADIUS, SEPARATION_RADIUS};
+use crate::world::{filter_neighbours, World, COHESION_RADIUS, SEPARATION_RADIUS};
 
 pub const SPEED: f32 = 100.0;
 
@@ -42,10 +42,10 @@ impl Boid {
 	/// `dt` is the time in seconds between this update and the previous update.
 	pub fn update(&mut self, world: &World, dt: f32) {
 		let neighbours = world.neighbours(self, COHESION_RADIUS);
-		let too_close_neighbours = world.neighbours(self, SEPARATION_RADIUS);
-
 		let alignment = self.alignment(&neighbours);
 		let cohesion = self.cohesion(&neighbours);
+
+		let too_close_neighbours = filter_neighbours(&neighbours, self.pos, SEPARATION_RADIUS);
 		let separation = self.separation(&too_close_neighbours);
 
 		self.dir = lerp_vecs(
@@ -72,7 +72,7 @@ impl Boid {
 	/// neighbours.
 	#[must_use]
 	#[allow(clippy::unused_self)]
-	fn alignment(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
+	fn alignment(&self, neighbours: &[Boid]) -> Vector2D<f32> {
 		neighbours
 			.iter()
 			.map(|boid| boid.dir)
@@ -83,7 +83,7 @@ impl Boid {
 	/// Returns the cohesion vector (pointing to the centre-point) of this boid's
 	/// neighbours.
 	#[must_use]
-	fn cohesion(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
+	fn cohesion(&self, neighbours: &[Boid]) -> Vector2D<f32> {
 		let avg_pos = neighbours
 			.iter()
 			.map(|boid| boid.pos.to_vector())
@@ -95,10 +95,10 @@ impl Boid {
 	/// Returns the separation vector (pointing away from the centre-point) of
 	/// this boid's nearer neighbourhood.
 	#[must_use]
-	fn separation(&self, neighbours: &[&Boid]) -> Vector2D<f32> {
+	fn separation(&self, neighbours: &[Boid]) -> Vector2D<f32> {
 		neighbours
 			.iter()
-			.filter(|&boid| *boid != self)
+			.filter(|&boid| boid != self)
 			.map(|boid| {
 				let away = self.pos - boid.pos;
 				away / away.square_length()
