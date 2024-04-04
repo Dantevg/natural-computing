@@ -10,10 +10,7 @@ use crate::{
 	Cell,
 };
 
-pub trait CPMCell
-where
-	Self: Cell,
-{
+pub trait CPMCell: Cell {
 	const MAX_ID: usize;
 
 	#[must_use]

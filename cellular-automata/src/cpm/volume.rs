@@ -3,10 +3,7 @@ use crate::{
 	world::{Coord, World},
 };
 
-pub trait Volume<const W: usize, const H: usize>
-where
-	Self: CPM<W, H>,
-{
+pub trait Volume<const W: usize, const H: usize>: CPM<W, H> {
 	#[must_use]
 	fn get_volume_penalty(&self, cell: Self::C, volume: u32) -> f32;
 

@@ -3,10 +3,7 @@ use crate::{
 	world::{Coord, World},
 };
 
-pub trait Perimeter<const W: usize, const H: usize>
-where
-	Self: CPM<W, H>,
-{
+pub trait Perimeter<const W: usize, const H: usize>: CPM<W, H> {
 	#[must_use]
 	fn get_perimeter_penalty(&self, cell: Self::C, perimeter: u32) -> f32;
 

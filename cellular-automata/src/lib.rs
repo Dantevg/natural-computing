@@ -2,10 +2,7 @@ pub mod ca;
 pub mod cpm;
 pub mod world;
 
-pub trait Cell
-where
-	Self: Clone + Copy + PartialEq + Eq,
-{
+pub trait Cell: Clone + Copy + PartialEq + Eq {
 	#[must_use]
 	fn colour(&self) -> [u8; 4];
 }

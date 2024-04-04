@@ -3,10 +3,7 @@ use crate::{
 	world::{Coord, World},
 };
 
-pub trait Adhesion<const W: usize, const H: usize>
-where
-	Self: CPM<W, H>,
-{
+pub trait Adhesion<const W: usize, const H: usize>: CPM<W, H> {
 	#[must_use]
 	fn get_adhesion_penalty(&self, a: Self::C, b: Self::C) -> f32;
 

@@ -9,9 +9,8 @@ pub trait ActCell {
 	fn get_activity(&self) -> u8;
 }
 
-pub trait Act<const W: usize, const H: usize>
+pub trait Act<const W: usize, const H: usize>: CPM<W, H>
 where
-	Self: CPM<W, H>,
 	Self::C: ActCell,
 {
 	#[must_use]
