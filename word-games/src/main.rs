@@ -9,10 +9,8 @@ fn main() -> Result<(), word_list::Error> {
 	let mut wordle = wordle::Game::from_word_lists(&word_lists, 6);
 
 	for _ in 0..8 {
-		println!(
-			"{:?}",
-			wordle.guess(choose_target_word(&word_lists.targets))
-		);
+		let guess = choose_target_word(&word_lists.targets);
+		println!("{guess} {:?}", wordle.guess(guess));
 	}
 
 	Ok(())

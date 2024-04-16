@@ -179,19 +179,19 @@ fn load_list<P: AsRef<Path>>(path: P) -> Result<WordList, Error> {
 	if line_length > u32::MAX as usize {
 		return Err(Error::TooLong(first_word));
 	}
-	first_word.pop(); // remove newline character that was included by read_line
 
-	let mut list = Vec::with_capacity(file_size / line_length);
+	// remove newline character that was included by read_line
+	first_word = first_word.trim_end().to_owned();
+	let word_length = first_word.len();
+
+	let mut list = Vec::with_capacity(file_size / word_length);
 	list.push(first_word);
 
 	for word in reader.lines() {
 		match word {
-			Ok(w) if w.len() == line_length - 1 => list.push(w),
+			Ok(w) if w.len() == word_length => list.push(w),
 			Ok(w) => {
-				return Err(Error::InequalLengths(
-					(line_length - 1) as u32,
-					w.len() as u32,
-				))
+				return Err(Error::InequalLengths(word_length as u32, w.len() as u32));
 			}
 			Err(e) => return Err(e.into()),
 		}
