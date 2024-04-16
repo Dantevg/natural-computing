@@ -1,5 +1,5 @@
 [workspace]
-members = ["cellular-automata", "act-cpm-ui", "boids", "boids-ui"]
+members = ["cellular-automata", "act-cpm-ui", "boids", "boids-ui", "word-games"]
 resolver = "2"
 
 [workspace.lints.clippy]

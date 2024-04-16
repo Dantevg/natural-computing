@@ -2258,6 +2258,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "word-games"
+version = "1.0.0"
+dependencies = [
+ "rand",
+ "thiserror",
+]
+
+[[package]]
 name = "x11-dl"
 version = "2.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
